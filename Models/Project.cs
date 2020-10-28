@@ -10,11 +10,13 @@ namespace pm.Models
         public long Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int CreatorId { get; set; }
+        public long CreatorId { get; set; }
+        public bool IsPrivate { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         /*----------------------------------------*/
-        public List<User> Executors { get; set; }
-        public User Creator { get; set; }
-        public List<Task> Tasks { get; set; }
+        //public List<User> Executors { get; set; }
+        //public User Creator { get; set; }
+        //public List<Task> Tasks { get; set; }
     }
 }

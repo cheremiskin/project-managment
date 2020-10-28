@@ -17,6 +17,6 @@ namespace pm.Models
         public DateTime ExecutionTime { get; set; }
 
         /*----------------------------------------*/
-        public List<Comment> Comments { get; set; }
+        //public List<Comment> Comments { get; set; }
     }
 }

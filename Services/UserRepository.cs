@@ -10,7 +10,7 @@ namespace project_managment.Services
 {
     public class UserRepository : BaseRepository, IUserRepository
     {
-        private string userMappingString = "id Id, email Email, password Password, birth_date BirthDate, full_name FullName, rights_id RightsId";
+        private string userMappingString = "id as Id, email as Email, password as Password, birth_date as BirthDate, full_name as FullName, rights_id as RightsId";
 
         public UserRepository(IConfiguration configuration) : base(configuration)
         {

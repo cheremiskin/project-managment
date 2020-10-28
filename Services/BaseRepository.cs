@@ -14,12 +14,12 @@ namespace project_managment.Services
     public abstract class BaseRepository
     {
         private IConfiguration configuration;
-        private string connectionString = "User ID=postgres;Password=5361988;Server=localhost;Port=5432;Database=pm;";
+        private string connectionString;
 
         protected BaseRepository(IConfiguration configuration)
         {
-            configuration = configuration;
-            // connectionString = configuration.GetConnectionString("DefaultConnection");
+            this.configuration = configuration;
+            this.connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         protected async Task<T> WithConnection<T>(Func<IDbConnection, Task<T>> getData)

@@ -40,7 +40,9 @@ ON DELETE SET DEFAULT;
 CREATE TABLE projects(
     id BIGINT PRIMARY KEY DEFAULT nextval('projects_id_seq'),
     name VARCHAR(255) NOT NULL,
-    descripton TEXT,
+    description TEXT,
+    is_private BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
     creator_id INT
 );
 
@@ -115,3 +117,11 @@ INSERT INTO users(email, birth_date, info, full_name, rights_id, password) VALUE
 ('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 2, 'p03i12kjfdsf'),
 ('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 2, 'p03i12kjfdsf'),
 ('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 1, 'p03i12kjfdsf');
+
+INSERT INTO projects(name, description, is_private, created_at, creator_id) VALUES
+('chat', 'it is chat', FALSE, DEFAULT, 1),
+('pm', 'it is somethign', FALSE, DEFAULT, 1),
+('music player', 'it is not chat', FALSE, DEFAULT, 1),
+('todo list', 'you can craete tasks', FALSE, DEFAULT, 4),
+('something', 'it is not something', FALSE, DEFAULT, 2),
+('i will regret it', 'yes', FALSE, DEFAULT, 3);

@@ -16,7 +16,7 @@ namespace pm.Models
         public int RightsId { get; set; }
 
         /*----------------------------------------*/
-        public List<Project> CreatedProjects { get; set; }
-        public List<Project> EnrolledProjects { get; set; }
+        //public List<Project> CreatedProjects { get; set; }
+        //public List<Project> EnrolledProjects { get; set; }
     }
 }

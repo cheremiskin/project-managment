@@ -23,6 +23,7 @@ namespace project_managment
         {
             services.AddSingleton(Configuration);
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IProjectRepository, ProjectRepository>();
 
 
             services.AddControllersWithViews();
