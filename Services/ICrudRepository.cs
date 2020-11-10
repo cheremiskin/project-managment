@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace project_managment.Services
 {
-    public interface ICRUDRepository<E>
+    public interface ICrudRepository<E>
     {
         Task<E> FindById(long id);
         Task<IEnumerable<E>> FindAll(int limit = 0, int offset = 0);

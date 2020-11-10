@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace project_managment.Services
 {
-    public interface IUserRepository : ICRUDRepository<User>
+    public interface IUserRepository : ICrudRepository<User>
     { 
         Task<User> FindUserByEmail(string email);
+        Task<IEnumerable<string>> FindRolesById(long id);
     }
 }

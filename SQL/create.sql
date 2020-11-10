@@ -1,25 +1,28 @@
 DROP TABLE IF EXISTS task_user;
 DROP TABLE IF EXISTS project_user;
+DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS projects CASCADE;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tasks;
-DROP TABLE IF EXISTS rights;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS log;
 
 DROP SEQUENCE IF EXISTS users_id_seq;
 DROP SEQUENCE IF EXISTS comments_id_seq;
 DROP SEQUENCE IF EXISTS tasks_id_seq;
 DROP SEQUENCE IF EXISTS projects_id_seq;
-DROP SEQUENCE IF EXISTS rights_id_seq;
+DROP SEQUENCE IF EXISTS log_id_seq;
 
 CREATE SEQUENCE users_id_seq START WITH 1;
 CREATE SEQUENCE comments_id_seq START WITH 1;
 CREATE SEQUENCE tasks_id_seq START WITH 1;
 CREATE SEQUENCE projects_id_seq START WITH 1;
-CREATE SEQUENCE rights_id_seq START WITH 1;
+CREATE SEQUENCE log_id_seq START WITH 1;
 
-CREATE TABLE rights(
-    id BIGINT PRIMARY KEY DEFAULT nextval('rights_id_seq'),
+
+CREATE TABLE roles(
+    id BIGINT PRIMARY KEY,
     name VARCHAR(16) NOT NULL
 );
 
@@ -29,13 +32,21 @@ CREATE TABLE users(
     password VARCHAR(255) NOT NULL,
     birth_date DATE,
     info VARCHAR(512),
-    full_name VARCHAR(128),
-    rights_id INT
+    full_name VARCHAR(128)
 );
 
-ALTER TABLE users ADD CONSTRAINT users_rigths_id_fk
-FOREIGN KEY(rights_id) REFERENCES rights(id)
-ON DELETE SET DEFAULT;
+CREATE TABLE user_role(
+    user_id INT NOT NULL,
+    role_id INT NOT NULL
+);
+
+ALTER TABLE user_role ADD CONSTRAINT user_role_user_id_fk
+FOREIGN KEY(user_id) REFERENCES users(id)
+ON DELETE CASCADE;
+
+ALTER TABLE user_role ADD CONSTRAINT user_role_role_id_fk
+FOREIGN KEY(role_id) REFERENCES roles(id)
+ON DELETE CASCADE;
 
 CREATE TABLE projects(
     id BIGINT PRIMARY KEY DEFAULT nextval('projects_id_seq'),
@@ -108,15 +119,29 @@ ALTER TABLE project_user ADD CONSTRAINT project_user_project_id_fk
 FOREIGN KEY(project_id) REFERENCES projects(id)
 ON DELETE CASCADE;
 
-INSERT INTO rights(id, name) VALUES 
-(1, 'admin'), (2, 'user'), (3, 'guest');
+CREATE TABLE log(
+    id BIGINT PRIMARY KEY DEFAULT nextval('log_id_seq'),
+    date_created TIMESTAMP NOT NULL,
+    thread VARCHAR(255),
+    level VARCHAR(50),
+    logger VARCHAR(255),
+    message VARCHAR(4096),
+    exception VARCHAR(2048)
+);
 
-INSERT INTO users(email, birth_date, info, full_name, rights_id, password) VALUES 
-('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 1, 'p03i12kjfdsf'),
-('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 2, 'p03i12kjfdsf'),
-('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 2, 'p03i12kjfdsf'),
-('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 2, 'p03i12kjfdsf'),
-('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 1, 'p03i12kjfdsf');
+
+INSERT INTO roles(id, name) VALUES 
+(1, 'ROLE_ADMIN'), (2, 'ROLE_USER'), (3, 'ROLE_GUEST');
+
+INSERT INTO users(email, birth_date, info, full_name, password) VALUES 
+('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf'),
+('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 'p03i12kjfdsf'),
+('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 'p03i12kjfdsf'),
+('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 'p03i12kjfdsf'),
+('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 'p03i12kjfdsf');
+
+INSERT INTO user_role(user_id, role_id) VALUES 
+(1, 1), (2, 2), (2, 2), (4, 2), (4,3);
 
 INSERT INTO projects(name, description, is_private, created_at, creator_id) VALUES
 ('chat', 'it is chat', FALSE, DEFAULT, 1),

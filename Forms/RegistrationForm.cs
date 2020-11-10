@@ -31,7 +31,6 @@ namespace project_managment.Forms
             user.Info = Info;
             user.FullName = FullName;
             user.BirthDate = BirthDate;
-            user.RightsId = 2;
 
             return user;
         }

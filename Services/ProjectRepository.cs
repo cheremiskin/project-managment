@@ -23,39 +23,27 @@ namespace project_managment.Services
         public async Task<IEnumerable<Project>> FindAll(int limit = 0, int offset = 0)
         {
             string sql = $@"SELECT {projectMappingString} FROM {tableName}";
-            return await WithConnection<IEnumerable<Project>>(async (connection) =>
-            {
-                return await connection.QueryAsync<Project>(sql);
-            });
+            return await WithConnection<IEnumerable<Project>>(async (connection) => await connection.QueryAsync<Project>(sql));
         }
 
         public async Task<Project> FindById(long id)
         {
             string sql = $@"SELECT {projectMappingString} FROM {tableName} WHERE id = @id";
-            return await WithConnection(async (connection) =>
-            {
-                return await connection.QueryFirstOrDefaultAsync<Project>(sql, new { id = id });
-            });
+            return await WithConnection(async (connection) => await connection.QueryFirstOrDefaultAsync<Project>(sql, new { id = id }));
         }
 
         public async Task<IEnumerable<Project>> FindNotPrivateProjects()
         {
             string sql = $@"SELECT {projectMappingString} FROM {tableName} WHERE is_private = False";
 
-            return await WithConnection(async (connection) =>
-            {
-                return await connection.QueryAsync<Project>(sql);
-            });
+            return await WithConnection(async (connection) => await connection.QueryAsync<Project>(sql));
         }
 
         public async Task<IEnumerable<Project>> FindProjectsByName(string Name)
         {
             string sql = $@"SELECT {projectMappingString} FROM {tableName} WHERE name = @Name";
 
-            return await WithConnection<IEnumerable<Project>>(async (connection) =>
-            {
-                return await connection.QueryAsync<Project>(sql, new { Name });
-            });
+            return await WithConnection<IEnumerable<Project>>(async (connection) => await connection.QueryAsync<Project>(sql, new { Name }));
         }
 
         public async  System.Threading.Tasks.Task Remove(Project entity)

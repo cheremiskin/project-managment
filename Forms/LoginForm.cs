@@ -14,5 +14,10 @@ namespace project_managment.Forms
         
         [Required]
         public string Password { get; set; }
+
+        public bool PasswordMatch(string userPassword, Func<string, string, bool> checkPassword)
+        {
+            return checkPassword(Password, userPassword);
+        }
     }
 }
