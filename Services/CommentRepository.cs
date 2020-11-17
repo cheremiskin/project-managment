@@ -20,13 +20,19 @@ namespace project_managment.Services
 
         }
 
-        public async Task<IEnumerable<Comment>> FindAll(int limit = 0, int offset = 0)
+        public async Task<IEnumerable<Comment>> FindAll()
         {
-            string sql = $@"SELECT {commentMappingString} from {tableName}";
-            return await WithConnection<IEnumerable<Comment>>(async (connection) =>
-            {
-                return await connection.QueryAsync<Comment>(sql);
-            });
+            var sql = $@"SELECT {commentMappingString} FROM {tableName}";
+            return await WithConnection<IEnumerable<Comment>>(
+                async (connection) => await connection.QueryAsync<Comment>(sql));
+        }
+
+        public async Task<IEnumerable<Comment>> FindAll(int page, int size)
+        {
+            var sql = $@"SELECT {commentMappingString} FROM {tableName} ORDER BY id OFFSET {page * size} LIMIT {size}";
+            return await WithConnection<IEnumerable<Comment>>(async (connection) => 
+                    await connection.QueryAsync<Comment>(sql));
+            
         }
 
         public async Task<Comment> FindById(long id)
