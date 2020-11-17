@@ -24,7 +24,7 @@ namespace project_managment.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "ROLE_ADMIN")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Project>>> FindAllProjects()
         {
             var projects = await projectRepository.FindAll();
@@ -33,7 +33,6 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        [Authorize]
         public async Task<ActionResult<Project>> FindUserById(long id)
         {
             Project project = await projectRepository.FindById(id);

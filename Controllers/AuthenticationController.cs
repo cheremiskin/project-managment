@@ -20,7 +20,8 @@ using AuthenticationOptions = project_managment.Authentication.AuthenticationOpt
 namespace project_managment.Controllers
 {
     [ApiController]
-    [Route("/api/auth")]
+    [Route("/api")]
+    [Produces("application/json")]
     public class AuthenticationController : Controller
     {
         private readonly IUserRepository _userRepository;
@@ -31,13 +32,12 @@ namespace project_managment.Controllers
         }
 
         [HttpPost("token")]
-        [Produces("application/json")]
         [ValidateModel]
         public async Task<IActionResult> Token([FromBody] LoginForm form)
         {
             ClaimsIdentity claimsIdentity = await GetIdentity(form.Email, form.Password);
             if (claimsIdentity == null)
-                return BadRequest(new {errorText = "Invalid email or password"});
+                return BadRequest(new {error_text = "Invalid email or password"});
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                     issuer: AuthenticationOptions.ISSUER,
@@ -65,9 +65,9 @@ namespace project_managment.Controllers
             {
                 var claims = new List<Claim> {new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email)};
 
-                var roles = await _userRepository.FindRolesById(user.Id);
+                var role = await _userRepository.FindRoleByUserId(user.Id);
 
-                claims.AddRange(roles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
+                claims.Add( new Claim(ClaimsIdentity.DefaultRoleClaimType, role));
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", 
                     ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

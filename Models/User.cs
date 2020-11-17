@@ -14,9 +14,7 @@ namespace pm.Models
         public string Password { get; set; }
         public string Info { get; set; }
 
-        /*----------------------------------------*/
-        //public List<Project> CreatedProjects { get; set; }
-        //public List<Project> EnrolledProjects { get; set; }
+        public int RoleId { get; set; }
 
         public override string ToString()
         {

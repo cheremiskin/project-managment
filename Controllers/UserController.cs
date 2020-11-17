@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Transactions;
 using log4net;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS;
 using pm.Models;
 using project_managment.Filters;
 using project_managment.Forms;
@@ -27,11 +31,10 @@ namespace project_managment.Controllers
         }
 
         [HttpGet] 
+        [Authorize(Roles = "ROLE_ADMIN")]
         public async Task<ActionResult<IEnumerable<User>>> FindAllUsers()
         {
             var users = await _userRepository.FindAll();
-
-            // _log.Info("All users were requested");
             return Ok(users);
         }
 
@@ -42,7 +45,6 @@ namespace project_managment.Controllers
             User user = await _userRepository.FindById(id);
             if (user == null)
                 return NotFound();
-            // _log.Info($"Requester user: ${user}", null);
             return Ok(user);
         }
 
@@ -71,14 +73,20 @@ namespace project_managment.Controllers
         [HttpPost]
         [Route("register")]
         [ValidateModel]
-        public IActionResult RegisterUser(RegistrationForm form)
+        public async Task<IActionResult> RegisterUser(RegistrationForm form)
         {
+            User userWithEmail = await _userRepository.FindUserByEmail(form.Email);
+            if (userWithEmail != null)
+            {
+                return BadRequest(new {error_text = "User with this email already exists"}); 
+            }
+            
             User user = form.ToUser();
+            
             try 
             {
-                _userRepository.Save(user);
-
-                return Ok();
+                await _userRepository.Save(user);
+                return Ok(); // should return code 201 (created)
             }
             catch (Exception ex)
             {

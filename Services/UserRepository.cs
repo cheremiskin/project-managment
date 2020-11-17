@@ -10,9 +10,11 @@ namespace project_managment.Services
 {
     public class UserRepository : BaseRepository, IUserRepository
     {
-        private const string UserMappingString = "id as Id, email as Email, password as Password, birth_date as BirthDate, full_name as FullNamed, role_id as RoleId, info as Info";
+        private const string UserMappingString = "id as Id, email as Email, password as Password, birth_date as BirthDate, full_name as FullName, role_id as RoleId, info as Info";
         private const string TableFieldsString = "id, email, password, birth_date, full_name, role_id, info";
-        private const string ObjectFieldsString = "@Id, @Email, @Password, @BirtDate, @FullName, @RoleId, @Info";
+        private const string ObjectFieldsString = "@Id, @Email, @Password, @BirthDate, @FullName, @RoleId, @Info";
+        private const string ObjectFieldsWithoutIdString = "@Email, @Password, @BirthDate, @FullName, @RoleId, @Info";
+        private const string TableFieldsWithoutIdString = "email, password, birth_date, full_name, role_id, info";
         private const string TableName = "users";
 
         public UserRepository(IConfiguration configuration) : base(configuration)
@@ -42,12 +44,9 @@ namespace project_managment.Services
 
         public async System.Threading.Tasks.Task Save(User user)
         {
-            string sql = $@"INSERT INTO users({TableFieldsString}) VALUES " +
-                           $"({ObjectFieldsString})";
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, user);
-            });
+            string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
+                           $"({ObjectFieldsWithoutIdString})";
+            await WithConnection(async (connection) => { await connection.ExecuteAsync(sql, user); });
         }
 
         public async System.Threading.Tasks.Task Remove(User user)

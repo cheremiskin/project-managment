@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace project_managment.Forms
@@ -12,15 +13,21 @@ namespace project_managment.Forms
     {
         [Required]
         [EmailAddress]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
         [Required]
+        [JsonPropertyName("password")]
         public string Password { get; set; }
         [Required]
+        [JsonPropertyName("passwordConfirm")] 
         public string PasswordConfirm { get; set; }
+        [JsonPropertyName("info")]
         public string Info { get; set; }
         [StringLength(128)]
         [Required]
+        [JsonPropertyName("fullName")]
         public string FullName { get; set; }
+        [JsonPropertyName("birthDate")]
         public DateTime BirthDate { get; set; }
 
         public User ToUser()
@@ -31,6 +38,7 @@ namespace project_managment.Forms
             user.Info = Info;
             user.FullName = FullName;
             user.BirthDate = BirthDate;
+            user.RoleId = 2;
 
             return user;
         }
