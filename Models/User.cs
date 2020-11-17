@@ -13,10 +13,17 @@ namespace pm.Models
         public DateTime BirthDate { get; set; }
         public string Password { get; set; }
         public string Info { get; set; }
-        public int RightsId { get; set; }
 
-        /*----------------------------------------*/
-        //public List<Project> CreatedProjects { get; set; }
-        //public List<Project> EnrolledProjects { get; set; }
+        public int RoleId { get; set; }
+
+        public override string ToString()
+        {
+            return $"<Id {Id}; Email {Email}>";
+        }
+
+        public bool CheckPassword(string password, Func<string, string, bool> checkPassword)
+        {
+            return checkPassword(Password, password);
+        }
     }
 }

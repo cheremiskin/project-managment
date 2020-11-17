@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 namespace project_managment.Services
 {
-    public interface ICRUDRepository<E>
+    public interface ICrudRepository<E>
     {
         Task<E> FindById(long id);
-        Task<IEnumerable<E>> FindAll(int limit = 0, int offset = 0);
+        Task<IEnumerable<E>> FindAll();
+        Task<IEnumerable<E>> FindAll(int page, int size);
         Task Save(E entity);
         Task Remove(E entity);
         Task RemoveById(long id);

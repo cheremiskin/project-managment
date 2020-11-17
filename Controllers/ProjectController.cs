@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
@@ -12,17 +13,18 @@ using project_managment.Services;
 
 namespace project_managment.Controllers
 {
-    [Route("api/projects")]
     [ApiController]
+    [Route("api/projects")]
     public class ProjectController : ControllerBase
     {
-        private IProjectRepository projectRepository;
+        private readonly IProjectRepository projectRepository;
         public ProjectController(IProjectRepository projectRepository)
         {
             this.projectRepository = projectRepository;
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Project>>> FindAllProjects()
         {
             var projects = await projectRepository.FindAll();

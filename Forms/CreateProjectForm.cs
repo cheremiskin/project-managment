@@ -11,10 +11,13 @@ namespace project_managment.Forms
     public class CreateProjectForm
     {
         [Required]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonPropertyName("des")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
+        
+        [JsonPropertyName("isPrivate")]
         public bool IsPrivate { get; set; } = false;
     
         public Project ToProject(long creatorId)

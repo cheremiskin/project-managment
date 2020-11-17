@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace project_managment.Services
 {
-    public interface IProjectRepository : ICRUDRepository<Project>
+    public interface IProjectRepository : ICrudRepository<Project>
     {
-        Task<IEnumerable<Project>> FindProjectsByName(string Name);
+        Task<IEnumerable<Project>> FindProjectsByName(string name);
         Task<IEnumerable<Project>> FindNotPrivateProjects();
     }
 }
