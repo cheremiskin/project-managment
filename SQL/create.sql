@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS task_user;
 DROP TABLE IF EXISTS project_user;
-DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS projects CASCADE;
 DROP TABLE IF EXISTS users;
@@ -32,21 +31,12 @@ CREATE TABLE users(
     password VARCHAR(255) NOT NULL,
     birth_date DATE,
     info VARCHAR(512),
-    full_name VARCHAR(128)
+    full_name VARCHAR(128),
+    role_id INT NOT NULL DEFAULT 2
 );
 
-CREATE TABLE user_role(
-    user_id INT NOT NULL,
-    role_id INT NOT NULL
-);
-
-ALTER TABLE user_role ADD CONSTRAINT user_role_user_id_fk
-FOREIGN KEY(user_id) REFERENCES users(id)
-ON DELETE CASCADE;
-
-ALTER TABLE user_role ADD CONSTRAINT user_role_role_id_fk
-FOREIGN KEY(role_id) REFERENCES roles(id)
-ON DELETE CASCADE;
+ALTER TABLE users ADD CONSTRAINT users_role_id_fk
+FOREIGN KEY(role_id) REFERENCES roles(id);
 
 CREATE TABLE projects(
     id BIGINT PRIMARY KEY DEFAULT nextval('projects_id_seq'),
@@ -133,15 +123,13 @@ CREATE TABLE log(
 INSERT INTO roles(id, name) VALUES 
 (1, 'ROLE_ADMIN'), (2, 'ROLE_USER'), (3, 'ROLE_GUEST');
 
-INSERT INTO users(email, birth_date, info, full_name, password) VALUES 
-('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf'),
-('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 'p03i12kjfdsf'),
-('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 'p03i12kjfdsf'),
-('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 'p03i12kjfdsf'),
-('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 'p03i12kjfdsf');
+INSERT INTO users(email, birth_date, info, full_name, password, role_id) VALUES 
+('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf', 1),
+('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 'p03i12kjfdsf', 2),
+('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 'p03i12kjfdsf', 2),
+('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 'p03i12kjfdsf', 2),
+('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 'p03i12kjfdsf', 2);
 
-INSERT INTO user_role(user_id, role_id) VALUES 
-(1, 1), (2, 2), (2, 2), (4, 2), (4,3);
 
 INSERT INTO projects(name, description, is_private, created_at, creator_id) VALUES
 ('chat', 'it is chat', FALSE, DEFAULT, 1),
