@@ -33,7 +33,7 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Project>> FindUserById(long id)
+        public async Task<ActionResult<Project>> FindProjectById(long id)
         {
             Project project = await projectRepository.FindById(id);
             if (project == null)
@@ -61,7 +61,7 @@ namespace project_managment.Controllers
         public async Task<ActionResult> CreateProject(CreateProjectForm form)
         {
             long creatorId = 1;
-            Project project = form.ToProject(creatorId);
+            Project project = form.ToProject();
 
             try
             {

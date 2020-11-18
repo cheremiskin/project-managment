@@ -21,9 +21,11 @@ CREATE SEQUENCE log_id_seq START WITH 1;
 
 
 CREATE TABLE roles(
-    id BIGINT PRIMARY KEY,
+    id INT PRIMARY KEY,
     name VARCHAR(16) NOT NULL
 );
+
+INSERT INTO roles(id, name) VALUES (1, "ROLE_ADMIN"), (2, "ROLE_USER"), (3, "ROLE_GUEST");
 
 CREATE TABLE users(
     id BIGINT PRIMARY KEY DEFAULT nextval('users_id_seq'),
@@ -118,10 +120,6 @@ CREATE TABLE log(
     message VARCHAR(4096),
     exception VARCHAR(2048)
 );
-
-
-INSERT INTO roles(id, name) VALUES 
-(1, 'ROLE_ADMIN'), (2, 'ROLE_USER'), (3, 'ROLE_GUEST');
 
 INSERT INTO users(email, birth_date, info, full_name, password, role_id) VALUES 
 ('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf', 1),

@@ -11,7 +11,5 @@ namespace project_managment.Services
     { 
         Task<User> FindUserByEmail(string email);
         Task<string> FindRoleByUserId(long id);
-        Task<bool> EmailExists(string email); // метод не совсем подходит по логике к репозиторию, нужно с этим чот придумать
-                                              // можно сделать что то типа UserService 
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using project_managment.Authentication;
 using project_managment.Services;
+using project_managment.Services.RepositoryImpl;
 using Synercoding.FormsAuthentication;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
 using EncryptionMethod = Synercoding.FormsAuthentication.EncryptionMethod;
@@ -36,10 +37,10 @@ namespace project_managment
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = AuthenticationOptions.ISSUER,
+                        ValidIssuer = AuthenticationOptions.Issuer,
  
                         ValidateAudience = true,
-                        ValidAudience = AuthenticationOptions.AUDIENCE,
+                        ValidAudience = AuthenticationOptions.Audience,
                         ValidateLifetime = true,
  
                         IssuerSigningKey = AuthenticationOptions.GetSymmetricSecurityKey(),
@@ -48,6 +49,8 @@ namespace project_managment
                 });
             
             services.AddSingleton(Configuration);
+            services.AddTransient<ICommentRepository, CommentRepository>();
+            services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
 

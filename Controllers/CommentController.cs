@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
@@ -36,10 +37,7 @@ namespace project_managment.Controllers
         [Route("{id}")]
         public async Task<ActionResult<Comment>> FindCommentById(long id)
         {
-            Project comment = await commentRepository.FindById(id);
-            if (comment == null)
-                return NotFound();
-            return Ok(comment);
+            throw new NotImplementedException();
         }
 
         [HttpDelete]
@@ -59,14 +57,13 @@ namespace project_managment.Controllers
         [HttpPost]
         [Route("create")]
         [ValidateModel]
-        public async Task<ActionResult> CreateComment(CreateCommentForm form)
+        public async Task<ActionResult> CreateComment()
         {
-            long creatorId = 1;
-            Project project = form.ToProject(creatorId);
+            
+            throw new NotImplementedException();
 
             try
             {
-                await projectRepository.Save(project);
                 return Ok("nice");
             }
             catch (Exception ex)

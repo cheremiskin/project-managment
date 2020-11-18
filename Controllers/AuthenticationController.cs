@@ -40,13 +40,13 @@ namespace project_managment.Controllers
                 return BadRequest(new {error_text = "Invalid email or password"});
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
-                    issuer: AuthenticationOptions.ISSUER,
-                    audience: AuthenticationOptions.AUDIENCE,
+                    issuer: AuthenticationOptions.Issuer,
+                    audience: AuthenticationOptions.Audience,
                     notBefore: now,
                     claims: claimsIdentity.Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(AuthenticationOptions.LIFETIME)),
+                    expires: now.Add(TimeSpan.FromMinutes(AuthenticationOptions.Lifetime)),
                     signingCredentials: new SigningCredentials(AuthenticationOptions.GetSymmetricSecurityKey(), 
-                        AuthenticationOptions.SECURITY_ALGORITHM)
+                        AuthenticationOptions.SecurityAlgorithm)
             );
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 

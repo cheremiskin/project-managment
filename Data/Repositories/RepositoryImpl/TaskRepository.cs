@@ -1,19 +1,19 @@
+using System.Collections.Generic;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Task = pm.Models.Task;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+
 // using System.Threading.Tasks;
 
-namespace project_managment.Services
+namespace project_managment.Services.RepositoryImpl
 {
     public class TaskRepository : BaseRepository, ITaskRepository
     {
         private const string TaskMappingString = "id as Id, title as Title, status as Status, content as Content, project_id as ProjectId, creation_date as CreationDate, expiration_date as ExpirationDate, execution_time as ExecutionTime";
         private const string TableFieldsString = "id, title, status, content, project_id, creation_date, expiration_date, execution_time";
         private const string ObjectFieldsString = "@Id, @Title, @Status, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
+        private const string TableFieldsWithoutIdString = "title, status, content, project_id, creation_date, expiration_date, execution_time";
+        private const string ObjectFieldsWithoutIdString = "@Title, @Status, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
         private const string TableName = "tasks";
 
         public TaskRepository(IConfiguration configuration) : base(configuration)
@@ -64,8 +64,8 @@ namespace project_managment.Services
 
         public async System.Threading.Tasks.Task Save(Task entity)
         {
-            string sql = $@"INSERT INTO {TableName}({TableFieldsString}) VALUES " +
-                         $@"({ObjectFieldsString})";
+            string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
+                         $@"({ObjectFieldsWithoutIdString})";
             await WithConnection(async (connection) =>
             {
                 await connection.ExecuteAsync(sql, entity);
@@ -74,7 +74,7 @@ namespace project_managment.Services
 
         public async System.Threading.Tasks.Task Update(Task entity)
         {
-            string sql = $@"UPDATE {TableName} SET ({TableFieldsString}) = ({ObjectFieldsString}) WHERE id = @Id";
+            string sql = $@"UPDATE {TableName} SET ({TableFieldsWithoutIdString}) = ({ObjectFieldsWithoutIdString}) WHERE id = @Id";
 
             await WithConnection(async (connection) =>
             {

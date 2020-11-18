@@ -1,12 +1,11 @@
-﻿using Dapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using pm.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace project_managment.Services
+namespace project_managment.Services.RepositoryImpl
 {
     public class UserRepository : BaseRepository, IUserRepository
     {
@@ -82,13 +81,6 @@ namespace project_managment.Services
             return await WithConnection<string>(async connection =>
                 await connection.QueryFirstAsync<string>(sql, new {Id = id}) 
             );
-        }
-
-        public async Task<bool> EmailExists(string email)
-        {
-            // string sql = $@"SELECT COUNT(*) > 0 FROM users WHERE email = @email LIMIT 1";
-            throw new NotImplementedException();
-            // return await WithConnection(async connection => await connection.Query<bool>(sql, new {email}));
         }
 
         public async System.Threading.Tasks.Task Update(User entity)
