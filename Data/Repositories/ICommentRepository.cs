@@ -1,10 +1,8 @@
-using pm.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using pm.Models;
 
-namespace project_managment.Services
+namespace project_managment.Data.Repositories
 {
     public interface ICommentRepository : ICrudRepository<Comment>
     {

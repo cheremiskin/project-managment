@@ -3,7 +3,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
-using project_managment.Services.RepositoryImpl;
+using project_managment.Data.Repositories;
+using project_managment.Data.Services;
 using Task = System.Threading.Tasks.Task;
 
 namespace project_managment.Services.ServiceImpl
@@ -56,6 +57,11 @@ namespace project_managment.Services.ServiceImpl
             return _projectRepository.Update(entity);
         }
 
+        public Task<IEnumerable<Project>> FindAllNotPrivate(int page, int size)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public async Task AddTaskToProject(Project project, pm.Models.Task task, IIdentity identity )
         {
             // check if the user has rights for operation (should pass user object?)
@@ -69,6 +75,7 @@ namespace project_managment.Services.ServiceImpl
 
             task.ProjectId = project.Id;
             await _taskRepository.Update(task);
+
         }
 
         public Task AddUserToProject(Project project, User user, IIdentity identity)
@@ -79,20 +86,21 @@ namespace project_managment.Services.ServiceImpl
         public async Task AddUserToProject(long projectId, long userId, IIdentity identity )
         {
             User user = await _userRepository.FindById(userId);
-            if (user?.Id == null)
-                return; // bad request
+            if (user == null)
+                return; // bad request 400
             
             Project project = await _projectRepository.FindById(projectId);
-            if (project?.Id == null)
-                return; // bad request
+            if (project == null)
+                return; // bad request 400 
             
             User client = await GetUserByIdentity(identity);
             if (client == null || client.Id != project.CreatorId)
             {
-                return; // forbidden
+                return; // forbidden 403
             }
 
             await _projectRepository.LinkUserAndProject(user, project);
+            return; // 201
         }
 
         public Task RemoveTaskFromProject(Project project, pm.Models.Task task, IIdentity identity)

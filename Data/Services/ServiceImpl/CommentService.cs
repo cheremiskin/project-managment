@@ -1,6 +1,6 @@
-﻿namespace project_managment.Services.ServiceImpl
+﻿namespace project_managment.Data.Services.ServiceImpl
 {
-    public class CommentSerivce
+    public class CommentService : ICommentService
     {
         
     }

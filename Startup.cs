@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using System.Security.Cryptography.Xml;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,8 +12,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using project_managment.Authentication;
+using project_managment.Data.Repositories;
+using project_managment.Data.Repositories.RepositoryImpl;
+using project_managment.Data.Services;
+using project_managment.Data.Services.ServiceImpl;
 using project_managment.Services;
-using project_managment.Services.RepositoryImpl;
+using project_managment.Services.ServiceImpl;
 using Synercoding.FormsAuthentication;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
 using EncryptionMethod = Synercoding.FormsAuthentication.EncryptionMethod;
@@ -47,12 +52,23 @@ namespace project_managment
                         ValidateIssuerSigningKey = true,                        
                     };
                 });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("IsAdmin", b => b.RequireClaim(ClaimTypes.Role, "ROLE_ADMIN"));
+                options.AddPolicy("IsUser", b => b.RequireClaim(ClaimTypes.Role, "ROLE_USER"));
+                options.AddPolicy("IsUserOrAdmin", b => b.RequireClaim(ClaimTypes.Role, "ROLE_USER", "ROLE_ADMIN"));
+            });
             
             services.AddSingleton(Configuration);
             services.AddTransient<ICommentRepository, CommentRepository>();
             services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
+
+            services.AddTransient<IProjectService, ProjectService>();
+            services.AddTransient<ICommentService, CommentService>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ITaskService, TaskService>();
 
             services.AddControllersWithViews();
 

@@ -1,11 +1,8 @@
-﻿using pm.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Task = pm.Models.Task;
+﻿using System.Threading.Tasks;
+using pm.Models;
+using project_managment.Services;
 
-namespace project_managment.Services
+namespace project_managment.Data.Repositories
 {
     public interface IUserRepository : ICrudRepository<User>
     { 

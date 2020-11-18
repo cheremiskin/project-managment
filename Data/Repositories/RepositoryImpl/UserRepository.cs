@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using pm.Models;
 
-namespace project_managment.Services.RepositoryImpl
+namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class UserRepository : BaseRepository, IUserRepository
     {

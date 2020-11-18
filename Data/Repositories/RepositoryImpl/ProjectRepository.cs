@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using pm.Models;
 using Task = System.Threading.Tasks.Task;
 
-namespace project_managment.Services.RepositoryImpl
+namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class ProjectRepository : BaseRepository, IProjectRepository
     {
@@ -85,7 +85,7 @@ namespace project_managment.Services.RepositoryImpl
 
         public async System.Threading.Tasks.Task Save(Project entity)
         {
-            if (entity?.Id == null)
+            if (entity == null)
                 throw new Exception();
                 
             var sql= $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
@@ -94,6 +94,9 @@ namespace project_managment.Services.RepositoryImpl
             {
                 await connection.ExecuteAsync(sql, entity);
             });
+            
+            
+            
         }
 
         public async System.Threading.Tasks.Task Update(Project entity)

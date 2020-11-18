@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace project_managment.Services
+namespace project_managment.Data.Repositories
 {
     public interface ICrudRepository<E>
     {

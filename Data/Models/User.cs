@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace pm.Models
 {
@@ -12,9 +13,12 @@ namespace pm.Models
         public string FullName { get; set; }
         public DateTime BirthDate { get; set; }
         public string Password { get; set; }
+        [JsonIgnore]
         public string Info { get; set; }
 
+        [JsonIgnore]
         public int RoleId { get; set; }
+        
 
         public override string ToString()
         {

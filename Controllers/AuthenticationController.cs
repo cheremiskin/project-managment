@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
+using project_managment.Data.Repositories;
 using project_managment.Filters;
 using project_managment.Forms;
 using project_managment.Services;
@@ -67,7 +68,7 @@ namespace project_managment.Controllers
 
                 var role = await _userRepository.FindRoleByUserId(user.Id);
 
-                claims.Add( new Claim(ClaimsIdentity.DefaultRoleClaimType, role));
+                claims.Add( new Claim(ClaimTypes.Role, role));
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", 
                     ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

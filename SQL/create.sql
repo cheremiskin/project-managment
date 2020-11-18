@@ -111,6 +111,9 @@ ALTER TABLE project_user ADD CONSTRAINT project_user_project_id_fk
 FOREIGN KEY(project_id) REFERENCES projects(id)
 ON DELETE CASCADE;
 
+ALTER TABLE project_user ADD CONSTRAINT project_user_unique
+UNIQUE(project_id, user_id);
+
 CREATE TABLE log(
     id BIGINT PRIMARY KEY DEFAULT nextval('log_id_seq'),
     date_created TIMESTAMP NOT NULL,

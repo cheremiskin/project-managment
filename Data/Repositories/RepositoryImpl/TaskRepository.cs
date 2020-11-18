@@ -5,7 +5,7 @@ using Task = pm.Models.Task;
 
 // using System.Threading.Tasks;
 
-namespace project_managment.Services.RepositoryImpl
+namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class TaskRepository : BaseRepository, ITaskRepository
     {

@@ -1,15 +1,10 @@
-﻿using Dapper;
-using System.Data.SqlTypes;
-using System;
+﻿using System;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
-using System.Collections;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 
-namespace project_managment.Services
+namespace project_managment.Data.Repositories
 {
     public abstract class BaseRepository
     {

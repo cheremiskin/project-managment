@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
+using project_managment.Data.Services;
 using project_managment.Filters;
 using project_managment.Forms;
 using project_managment.Services;
@@ -18,59 +19,12 @@ namespace project_managment.Controllers
 
     public class CommentController : ControllerBase
     {
-        private readonly ICommentRepository commentRepository;
-        public CommentController(ICommentRepository commentRepository)
+        private readonly ICommentService _commentService ;
+        public CommentController(ICommentService commentService)
         {
-            this.commentRepository = commentRepository;
+            _commentService = commentService;
         }
 
-        [HttpGet]
-        [Authorize]
-
-        public async Task<ActionResult<IEnumerable<Comment>>> FindAllComments()
-        {
-            var comments = await commentRepository.FindAll();
-            return Ok(comments);
-        }
-
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<Comment>> FindCommentById(long id)
-        {
-            throw new NotImplementedException();
-        }
-
-        [HttpDelete]
-        [Route("{id}")]
-        public async System.Threading.Tasks.Task RemoveCommentById(long id)
-        {
-            await commentRepository.RemoveById(id);
-        }
-
-        [HttpPut]
-        [Route("{id}")]
-        public async System.Threading.Tasks.Task UpdateComment(Comment comment)
-        {
-            await commentRepository.Update(comment);
-        }
-
-        [HttpPost]
-        [Route("create")]
-        [ValidateModel]
-        public async Task<ActionResult> CreateComment()
-        {
-            
-            throw new NotImplementedException();
-
-            try
-            {
-                return Ok("nice");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
         
     }
 }
