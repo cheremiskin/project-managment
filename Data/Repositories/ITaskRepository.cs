@@ -1,10 +1,7 @@
+using project_managment.Services;
 using Task = pm.Models.Task;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace project_managment.Services
+namespace project_managment.Data.Repositories
 {
     public interface ITaskRepository : ICrudRepository<Task>
     {
