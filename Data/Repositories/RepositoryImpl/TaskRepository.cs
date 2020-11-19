@@ -11,11 +11,11 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class TaskRepository : BaseRepository, ITaskRepository
     {
-        private const string TaskMappingString = "id as Id, title as Title, status as Status, content as Content, project_id as ProjectId, creation_date as CreationDate, expiration_date as ExpirationDate, execution_time as ExecutionTime";
-        private const string TableFieldsString = "id, title, status, content, project_id, creation_date, expiration_date, execution_time";
-        private const string ObjectFieldsString = "@Id, @Title, @Status, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
-        private const string TableFieldsWithoutIdString = "title, status, content, project_id, creation_date, expiration_date, execution_time";
-        private const string ObjectFieldsWithoutIdString = "@Title, @Status, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
+        private const string TaskMappingString = "id as Id, title as Title, status_id as StatusId, content as Content, project_id as ProjectId, creation_date as CreationDate, expiration_date as ExpirationDate, execution_time as ExecutionTime";
+        private const string TableFieldsString = "id, title, status_id, content, project_id, creation_date, expiration_date, execution_time";
+        private const string ObjectFieldsString = "@Id, @Title, @StatusId, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
+        private const string TableFieldsWithoutIdString = "title, status_id, content, project_id, creation_date, expiration_date, execution_time";
+        private const string ObjectFieldsWithoutIdString = "@Title, @StatusId, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
         private const string TableName = "tasks";
 
         public TaskRepository(IConfiguration configuration) : base(configuration)
@@ -68,9 +68,16 @@ namespace project_managment.Data.Repositories.RepositoryImpl
         {
             string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
                          $@"({ObjectFieldsWithoutIdString}) RETURNING id";
-            return await WithConnection(async (connection) =>
-                await connection.ExecuteScalarAsync<long>(sql, entity)
-            );
+            try
+            {
+                return await WithConnection(async (connection) =>
+                    await connection.ExecuteScalarAsync<long>(sql, entity)
+                );
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
         }
 
         public async System.Threading.Tasks.Task Update(Task entity)
@@ -81,6 +88,12 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             {
                 await connection.ExecuteAsync(sql, entity);
             });
+        }
+
+        public async Task<IEnumerable<Task>> FindAllInProjectById(long projectId)
+        {
+            var sql = $@"SELECT {TaskMappingString} FROM {TableName} WHERE project_id = @projectId";
+            return await WithConnection(async connection => await connection.QueryAsync<Task>(sql, new {projectId = projectId}));
         }
     }
 }

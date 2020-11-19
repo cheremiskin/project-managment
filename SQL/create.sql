@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS projects CASCADE;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS tasks;
 DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS statuses;
 DROP TABLE IF EXISTS log;
 
 DROP SEQUENCE IF EXISTS users_id_seq;
@@ -12,12 +13,15 @@ DROP SEQUENCE IF EXISTS comments_id_seq;
 DROP SEQUENCE IF EXISTS tasks_id_seq;
 DROP SEQUENCE IF EXISTS projects_id_seq;
 DROP SEQUENCE IF EXISTS log_id_seq;
+DROP SEQUENCE IF EXISTS statuses_id_seq;
 
 CREATE SEQUENCE users_id_seq START WITH 1;
 CREATE SEQUENCE comments_id_seq START WITH 1;
 CREATE SEQUENCE tasks_id_seq START WITH 1;
 CREATE SEQUENCE projects_id_seq START WITH 1;
 CREATE SEQUENCE log_id_seq START WITH 1;
+CREATE SEQUENCE statuses_id_seq START WITH 1;
+
 
 
 CREATE TABLE roles(
@@ -53,6 +57,10 @@ ALTER TABLE projects ADD CONSTRAINT projects_creator_id_fk
 FOREIGN KEY(creator_id) REFERENCES users(id)
 ON DELETE SET DEFAULT;
 
+CREATE TABLE statuses(
+    id INT PRIMARY KEY DEFAULT nextval('statuses_id_seq'),
+    name VARCHAR(64)
+);
 
 CREATE TABLE tasks(
     id BIGINT PRIMARY KEY DEFAULT nextval('tasks_id_seq'),
@@ -60,10 +68,14 @@ CREATE TABLE tasks(
     content TEXT,
     creation_date TIMESTAMP DEFAULT NOW(),
     expiration_date TIMESTAMP,
-    status INT DEFAULT 0,
+    status_id INT NULL,
     execution_time TIMESTAMP,
     project_id BIGINT NOT NULL
 );
+
+ALTER TABLE tasks ADD CONSTRAINT tasks_status_id_fk 
+FOREIGN KEY(status_id) REFERENCES statuses(id)
+ON DELETE SET NULL;
 
 ALTER TABLE tasks ADD CONSTRAINT tasks_project_id_fk 
 FOREIGN KEY(project_id) REFERENCES projects(id)

@@ -5,11 +5,8 @@ using pm.Models;
 
 namespace project_managment.Exceptions
 {
-    public class ProjectException
+    public class ProjectException : BaseException
     {
-        public string Code { get; set; }
-        public string Message { get; set; }
-        
         public static ProjectException NotFound()
         {
             return new ProjectException

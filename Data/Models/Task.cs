@@ -9,14 +9,12 @@ namespace pm.Models
     {
         public long Id { get; set; }
         public string Title { get; set; }
-        public int Status { get; set; }
+        public int StatusId { get; set; }
         public string Content { get; set; }
         public long ProjectId { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime ExpirationDate { get; set; }
         public DateTime ExecutionTime { get; set; }
 
-        /*----------------------------------------*/
-        //public List<Comment> Comments { get; set; }
     }
 }

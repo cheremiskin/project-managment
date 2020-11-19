@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using pm.Models;
 using project_managment.Data.Dto;
 using project_managment.Data.Repositories;
+using project_managment.Exceptions;
 using project_managment.Forms;
 
 namespace project_managment.Controllers
@@ -39,7 +40,7 @@ namespace project_managment.Controllers
         {
             var user = _userRepository.FindById(id).Result;
             if (user == null)
-                return NotFound();
+                return NotFound(UserException.NotFound());
             return Ok(new UserDto(user));
         }
 
@@ -49,7 +50,7 @@ namespace project_managment.Controllers
         {
             var user = GetClientUser();
             if (user == null)
-                return NotFound();
+                return NotFound(UserException.NotFound());
             return Ok(new UserDto(user));
         }
 
@@ -60,7 +61,7 @@ namespace project_managment.Controllers
             var role = GetClientRoleClaim()?.Value;
             if (User.Identity.IsAuthenticated && role != "ROLE_ADMIN")
             {
-                return Forbid();
+                return Unauthorized(UserException.CreationDenied());
             }
             var user = form.ToUser();
             long id = 0;
@@ -70,7 +71,7 @@ namespace project_managment.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("error saving user");
+                return BadRequest(UserException.CreationFailed());
             }
 
             user = _userRepository.FindById(id).Result;
@@ -84,10 +85,10 @@ namespace project_managment.Controllers
         {
             var user = _userRepository.FindUserByEmail(User.Identity.Name).Result;
             if (user.Id == id)
-                return BadRequest("you can't delete yourself");
+                return BadRequest(UserException.DeletionDenied());
             _userRepository.RemoveById(id);
 
-            return Ok();
+            return NoContent();
         }
     }
 }
