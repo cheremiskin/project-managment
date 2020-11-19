@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using project_managment.Data.Services;
+using project_managment.Data.Repositories;
 
 namespace project_managment.Controllers
 {
@@ -8,10 +8,10 @@ namespace project_managment.Controllers
 
     public class CommentController : ControllerBase
     {
-        private readonly ICommentService _commentService ;
-        public CommentController(ICommentService commentService)
+        private readonly ICommentRepository _commentRepository ;
+        public CommentController(ICommentRepository commentRepository)
         {
-            _commentService = commentService;
+            _commentRepository = commentRepository;
         }
 
         
