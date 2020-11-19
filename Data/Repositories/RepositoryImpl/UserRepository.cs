@@ -84,7 +84,7 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             );
         }
 
-        public async Task<IEnumerable<User>> FindUsersInProject(long projectId)
+        public async Task<IEnumerable<User>> FindAllUsersInProject(long projectId)
         {
             var sql = $@"SELECT {UserMappingString} from {TableName} where id in (SELECT user_id FROM project_user WHERE project_id = @projectId)";
             return await WithConnection<IEnumerable<User>>(async (connection) =>

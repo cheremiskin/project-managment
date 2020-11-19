@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
 using project_managment.Data.Dto;
-using project_managment.Data.Services;
+using project_managment.Data.Repositories;
 using project_managment.Forms;
 
 namespace project_managment.Controllers
@@ -15,19 +15,21 @@ namespace project_managment.Controllers
     [ApiController]
     [Route("api/users")]
     [Authorize(Policy = "IsUserOrAdmin")]
-    public class UserController : ControllerBase
+    public class UserController : ControllerBaseExt
     {
-        private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IUserRepository _userRepository;
+        private readonly IProjectRepository _projectRepository;
+        public UserController(IUserRepository userRepository, IProjectRepository projectRepository) : base(userRepository)
         {
-            _userService = userService;
+            _userRepository = userRepository;
+            _projectRepository = projectRepository;
         }
 
         [HttpGet]
         public ActionResult<List<UserDto>> GetUsers([Required, FromQuery(Name = "page")] int page,
                                                 [Required, FromQuery(Name = "size")] int size)
         {
-            var users = _userService.FindAll(page, size);
+            var users = _userRepository.FindAll(page, size).Result;
             return Ok(users.Select(u => new UserDto(u)));
         }
 
@@ -35,7 +37,7 @@ namespace project_managment.Controllers
         [Route("{id}")]
         public ActionResult<UserDto> GetUser(long id)
         {
-            var user = _userService.FindById(id);
+            var user = _userRepository.FindById(id).Result;
             if (user == null)
                 return NotFound();
             return Ok(new UserDto(user));
@@ -45,7 +47,7 @@ namespace project_managment.Controllers
         [Route("me")]
         public ActionResult<UserDto> GetMe()
         {
-            User user = _userService.FindByEmail(User.Identity.Name);
+            var user = GetClientUser();
             if (user == null)
                 return NotFound();
             return Ok(new UserDto(user));
@@ -55,7 +57,7 @@ namespace project_managment.Controllers
         [AllowAnonymous]
         public IActionResult PostUser(RegistrationForm form)
         {
-            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var role = GetClientRoleClaim()?.Value;
             if (User.Identity.IsAuthenticated && role != "ROLE_ADMIN")
             {
                 return Forbid();
@@ -64,14 +66,14 @@ namespace project_managment.Controllers
             long id = 0;
             try
             {
-                id = _userService.Save(user);
+                id = _userRepository.Save(user).Result;
             }
             catch (Exception ex)
             {
                 return BadRequest("error saving user");
             }
 
-            user = _userService.FindById(id);
+            user = _userRepository.FindById(id).Result;
             return Created("", new UserDto(user));
         }
 
@@ -80,16 +82,12 @@ namespace project_managment.Controllers
         [Authorize(Policy = "IsAdmin")]
         public IActionResult DeleteUser(long id)
         {
-            User user = _userService.FindByEmail(User.Identity.Name);
+            var user = _userRepository.FindUserByEmail(User.Identity.Name).Result;
             if (user.Id == id)
                 return BadRequest("you can't delete yourself");
-            _userService.RemoveById(id);
+            _userRepository.RemoveById(id);
 
             return Ok();
         }
-        
-        
-        
-        
     }
 }

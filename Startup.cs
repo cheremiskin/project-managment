@@ -11,14 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using project_managment.Authentication;
 using project_managment.Data.Repositories;
 using project_managment.Data.Repositories.RepositoryImpl;
-using project_managment.Data.Services;
-using project_managment.Data.Services.ServiceImpl;
-using Synercoding.FormsAuthentication;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
-using EncryptionMethod = Synercoding.FormsAuthentication.EncryptionMethod;
 
 namespace project_managment
 {
@@ -62,11 +57,6 @@ namespace project_managment
             services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
-
-            services.AddTransient<IProjectService, ProjectService>();
-            services.AddTransient<ICommentService, CommentService>();
-            services.AddTransient<IUserService, UserService>();
-            services.AddTransient<ITaskService, TaskService>();
 
             services.AddControllersWithViews();
 

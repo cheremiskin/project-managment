@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using pm.Models;
+using pm.Models.Links;
 using Task = System.Threading.Tasks.Task;
 
 namespace project_managment.Data.Repositories.RepositoryImpl
@@ -142,16 +143,37 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             });
         }
 
-        public async Task LinkUserAndProject(User user, Project project) // подходит ли метод под паттерн репозитория ?
+        public async Task<ProjectUser> LinkUserAndProject(User user, Project project) // подходит ли метод под паттерн репозитория ?
         {
             if (user?.Id == null || project?.Id == null)
                 throw new Exception();
+
+            return await LinkUserAndProjectById(user.Id, project.Id);
+        }
+
+        public async Task<ProjectUser> LinkUserAndProjectById(long userId, long projectId)
+        {
+            var link = new ProjectUser {ProjectId = projectId, UserId = userId};
             
-            var sql = $@"INSERT INTO project_user(project_id, user_id) VALUES(@ProjectId, @UserId)";
-            await WithConnection(async (connection) =>
+            var sql = $@"INSERT INTO project_user(project_id, user_id) VALUES(@ProjectId, @UserId) RETURNING project_id AS ProjectId, user_id AS UserId";
+            try
             {
-                await connection.ExecuteAsync(sql, new {ProjectId = project.Id, UserId = user.Id});
-            });
+                return await WithConnection(async (connection) =>
+                    await connection.QuerySingleAsync<ProjectUser>(sql, link)
+                );
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> UnlinkUserAndProjectById(long userId, long projectId)
+        {
+            var sql = $@"DELETE FROM project_user WHERE project_id = @projectId AND user_id = @userId RETURNING project_id > 0";
+            return await WithConnection<bool>(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new {userId = userId, projectId = projectId}) 
+            );
         }
     }
 }

@@ -3,6 +3,6 @@
     public class ProjectUser
     {
         public long ProjectId { get; set; }
-        public long TaskId { get; set; }
+        public long UserId { get; set; }
     }
 }

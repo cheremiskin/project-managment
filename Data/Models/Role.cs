@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace pm.Models
 {
@@ -9,5 +10,11 @@ namespace pm.Models
     {
         public long Id { get; set; }
         public string Name { get; set; }
+        
+        [JsonIgnore]
+        public const string RoleAdmin = "ROLE_ADMIN";
+        [JsonIgnore] 
+        public const string RoleUser = "ROLE_USER";
+
     }
 }
