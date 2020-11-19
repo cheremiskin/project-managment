@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using pm.Models;
 using project_managment.Data.Dto;
 using project_managment.Data.Repositories;
+using project_managment.Exceptions;
 using project_managment.Filters;
 using project_managment.Forms;
 
@@ -50,7 +51,7 @@ namespace project_managment.Controllers
         {
             var project =  _projectRepository.FindById(id).Result;
             if (project == null)
-                return NotFound();
+                return NotFound(ProjectException.NotFound());
             var role = GetClientRoleClaim()?.Value;
             switch (role)
             {
@@ -66,7 +67,7 @@ namespace project_managment.Controllers
                     return Ok(project);
                 }
                 case null when project.IsPrivate:
-                    return Forbid();
+                    return Unauthorized(ProjectException.AccessDenied());
                 case null:
                     return Ok(project);
                 default:
@@ -81,19 +82,19 @@ namespace project_managment.Controllers
             var role = GetClientRoleClaim()?.Value;
             var project = _projectRepository.FindById(id).Result;
             if (project == null)
-                return NotFound("project not found");
+                return NotFound(ProjectException.NotFound());
             
             if (role == "ROLE_ADMIN")
             {
                 _projectRepository.Remove(project);
-                return Ok();
+                return NoContent();
             }
 
             if (role == "ROLE_USER")
             {
                 var user = _userRepository.FindUserByEmail(User.Identity.Name).Result;
                 if (user.Id != project.CreatorId)
-                    return Unauthorized("you can't delete this project");
+                    return Unauthorized(ProjectException.DeletionDenied());
                 _projectRepository.Remove(project);
                 return Ok();
             }
@@ -134,9 +135,9 @@ namespace project_managment.Controllers
             {
                 var targetProject = _projectRepository.FindById(id).Result;
                 if (targetProject == null)
-                    return BadRequest("project was not found");
+                    return NotFound(ProjectException.NotFound());
                 if (targetProject.CreatorId != user.Id)
-                    return Unauthorized();
+                    return Unauthorized(ProjectException.UpdateDenied());
 
                 await _projectRepository.Update(project);
                 return Ok();
@@ -153,7 +154,7 @@ namespace project_managment.Controllers
             var project = _projectRepository.FindById(projectId).Result;
 
             if (project == null)
-                return NotFound();
+                return NotFound(ProjectException.NotFound());
             var client = GetClientUser();
             var role = GetClientRoleClaim()?.Value;
 
@@ -165,7 +166,7 @@ namespace project_managment.Controllers
             if (members.FirstOrDefault(u => u.Id == client.Id) != null)
                 return Ok(members);
 
-            return Unauthorized();
+            return Unauthorized(ProjectException.AccessDenied());
         }
         
         [HttpPost]
@@ -179,10 +180,11 @@ namespace project_managment.Controllers
             var role = GetClientRoleClaim()?.Value;
             var client = GetClientUser();
             if (role != Role.RoleAdmin && project.CreatorId != client.Id)
-                return Unauthorized("you don't have rights to perform this operation");
+                return Unauthorized(ProjectException.AddMemberDenied());
+                
 
             var link = _projectRepository.LinkUserAndProjectById(userId, projectId).Result;
-            return link == null ? (IActionResult) BadRequest() : Created("", link);
+            return link == null ? (IActionResult) BadRequest(ProjectException.UserProjectLinkCreationFailed()) : Created("", link);
         }
 
         [HttpDelete]
@@ -192,14 +194,14 @@ namespace project_managment.Controllers
         {
             var project = _projectRepository.FindById(projectId).Result;
             if (project == null)
-                return NotFound("project was not found");
+                return NotFound(ProjectException.NotFound());
             var role = GetClientRoleClaim()?.Value;
             var client = GetClientUser();
             if (role != Role.RoleAdmin && project.CreatorId != client.Id)
-                return Unauthorized("you don't have rights to perform this operation");
+                return Unauthorized(ProjectException.DeleteMemberDenied());
 
             bool result = _projectRepository.UnlinkUserAndProjectById(userId, projectId).Result;
-            return result ? (IActionResult) NoContent() : BadRequest();
+            return result ? (IActionResult) NoContent() : BadRequest(ProjectException.UserProjectLinkDeletionFailed());
         }
     }
 }
