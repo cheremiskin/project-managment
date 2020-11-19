@@ -1,98 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Transactions;
-using log4net;
-using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.IIS;
 using pm.Models;
-using project_managment.Data.Repositories;
-using project_managment.Filters;
+using project_managment.Data.Dto;
+using project_managment.Data.Services;
 using project_managment.Forms;
-using project_managment.Services;
 
 namespace project_managment.Controllers
 {
     [ApiController]
     [Route("api/users")]
+    [Authorize(Policy = "IsUserOrAdmin")]
     public class UserController : ControllerBase
     {
-        // private static readonly ILog _log = log4net.LogManager.GetLogger(typeof(UserController)); 
-        private readonly IUserRepository _userRepository;
-        public UserController(IUserRepository userRepository)
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-            this._userRepository = userRepository;
+            _userService = userService;
         }
 
-        [HttpGet] 
-        [Authorize(Roles = "ROLE_ADMIN")]
-        public async Task<ActionResult<IEnumerable<User>>> FindAllUsers()
+        [HttpGet]
+        public ActionResult<List<UserDto>> GetUsers([Required, FromQuery(Name = "page")] int page,
+                                                [Required, FromQuery(Name = "size")] int size)
         {
-            var users = await _userRepository.FindAll();
-            return Ok(users);
+            var users = _userService.FindAll(page, size);
+            return Ok(users.Select(u => new UserDto(u)));
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<User>> FindUserById(long id)
+        public ActionResult<UserDto> GetUser(long id)
         {
-            User user = await _userRepository.FindById(id);
+            var user = _userService.FindById(id);
             if (user == null)
                 return NotFound();
-            return Ok(user);
+            return Ok(new UserDto(user));
+        }
+
+        [HttpGet]
+        [Route("me")]
+        public ActionResult<UserDto> GetMe()
+        {
+            User user = _userService.FindByEmail(User.Identity.Name);
+            if (user == null)
+                return NotFound();
+            return Ok(new UserDto(user));
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult PostUser(RegistrationForm form)
+        {
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (User.Identity.IsAuthenticated && role != "ROLE_ADMIN")
+            {
+                return Forbid();
+            }
+            var user = form.ToUser();
+            long id = 0;
+            try
+            {
+                id = _userService.Save(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("error saving user");
+            }
+
+            user = _userService.FindById(id);
+            return Created("", new UserDto(user));
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public async System.Threading.Tasks.Task RemoveUserById( long id)
+        [Authorize(Policy = "IsAdmin")]
+        public IActionResult DeleteUser(long id)
         {
-            await _userRepository.RemoveById(id);
-        }
+            User user = _userService.FindByEmail(User.Identity.Name);
+            if (user.Id == id)
+                return BadRequest("you can't delete yourself");
+            _userService.RemoveById(id);
 
-        [HttpPut]
-        [Route("{id}")]
-        public async System.Threading.Tasks.Task UpdateUser(User user)
-        {
-            await _userRepository.Update(user);
-        }
-
-        [HttpPost]
-        [Route("login")]
-        public IActionResult LoginUser(LoginForm form)
-        {
-            
             return Ok();
         }
-
-        [HttpPost]
-        [Route("register")]
-        [ValidateModel]
-        public async Task<IActionResult> RegisterUser(RegistrationForm form)
-        {
-            User userWithEmail = await _userRepository.FindUserByEmail(form.Email);
-            if (userWithEmail != null)
-            {
-                return BadRequest(new {error_text = "User with this email already exists"}); 
-            }
-            
-            User user = form.ToUser();
-            
-            try 
-            {
-                await _userRepository.Save(user);
-                return Ok(); // should return code 201 (created)
-            }
-            catch (Exception ex)
-            {
-                return BadRequest();
-            }
-        }
+        
+        
+        
+        
     }
 }

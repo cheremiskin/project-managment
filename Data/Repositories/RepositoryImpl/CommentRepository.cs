@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
@@ -22,14 +23,14 @@ namespace project_managment.Data.Repositories.RepositoryImpl
         public async Task<IEnumerable<Comment>> FindAll()
         {
             var sql = $@"SELECT {CommentMappingString} FROM {TableName}";
-            return await WithConnection<IEnumerable<Comment>>(
+            return await WithConnection(
                 async (connection) => await connection.QueryAsync<Comment>(sql));
         }
 
         public async Task<IEnumerable<Comment>> FindAll(int page, int size)
         {
             var sql = $@"SELECT {CommentMappingString} FROM {TableName} ORDER BY id OFFSET {page * size} LIMIT {size}";
-            return await WithConnection<IEnumerable<Comment>>(async (connection) => 
+            return await WithConnection(async (connection) => 
                     await connection.QueryAsync<Comment>(sql));
             
         }
@@ -37,16 +38,13 @@ namespace project_managment.Data.Repositories.RepositoryImpl
         public async Task<Comment> FindById(long id)
         {
             string sql = $@"SELECT {CommentMappingString} FROM {TableName} WHERE id = @id";
-            return await WithConnection(async (connection) =>
-            {
-                return await connection.QueryFirstOrDefaultAsync<Comment>(sql, new { id = id });
-            });
+            return await WithConnection(async (connection) => await connection.QueryFirstOrDefaultAsync<Comment>(sql, new { id = id }));
         }
 
-        public async Task<IEnumerable<Comment>> FindCommentsByTaskId(long task_id)
+        public async Task<IEnumerable<Comment>> FindCommentsByTaskId(long taskId)
         {
             string sql = $@"SELECT {CommentMappingString} FROM {TableName} WHERE task_id = @task_id";
-            return await WithConnection(async (connection) => await connection.QueryAsync<Comment>(sql, new {task_id=task_id}));
+            return await WithConnection(async (connection) => await connection.QueryAsync<Comment>(sql, new {task_id=taskId}));
         }
 
         public async  System.Threading.Tasks.Task Remove(Comment entity)
@@ -69,14 +67,13 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             });
         }
 
-        public async System.Threading.Tasks.Task Save(Comment entity)
+        public async Task<long> Save(Comment entity)
         {
             string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
-                         $@"({ObjectFieldsWithoutIdString})";
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, entity);
-            });
+                         $@"({ObjectFieldsWithoutIdString}) RETURNING id";
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<long>(sql, entity)
+            );
         }
 
         public async System.Threading.Tasks.Task Update(Comment entity)

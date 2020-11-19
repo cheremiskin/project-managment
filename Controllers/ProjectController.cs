@@ -2,93 +2,158 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Security.Policy;
+using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using pm.Models;
-using project_managment.Data.Repositories;
+using project_managment.Data.Repositories.RepositoryImpl;
 using project_managment.Data.Services;
 using project_managment.Filters;
 using project_managment.Forms;
-using project_managment.Services;
 
 namespace project_managment.Controllers
 {
     [ApiController]
     [Route("api/projects")]
-    [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsUserOrAdmin")]
     public class ProjectController : ControllerBase
     {
-        private readonly IProjectRepository _projectRepository;
+
+        private readonly IUserService _userService;
         private readonly IProjectService _projectService;
-        public ProjectController(IProjectRepository projectRepository, IProjectService projectService)
+        public ProjectController(IProjectService projectService, IUserService userService)
         {
-            _projectRepository = projectRepository;
             _projectService = projectService;
+            _userService = userService;
         }
 
         [HttpGet]
-        [Authorize(Policy = "IsUserOrAdmin")]
+        [AllowAnonymous]
         public async Task<IActionResult> FindAllProjects([Required,FromQuery(Name = "page")] int page, 
                                                             [Required, FromQuery(Name = "size")] int size)
         {
-            var projects = await _projectService.FindAll(page, size);
+            var claim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
+            IEnumerable<Project> projects = null;
+            if (claim == null || claim.Value == "ROLE_USER")
+                projects = _projectService.FindAllNotPrivate(page, size);
+            if (claim != null && claim.Value == "ROLE_ADMIN")
+                projects = await _projectService.FindAll(page, size);
+            
             return Ok(projects);
         }
 
         [HttpGet]
         [Route("{id}")]
-        [Authorize(Policy = "IsUserOrAdmin")]
-        public async Task<ActionResult<Project>> FindProjectById(long id)
+        [AllowAnonymous]
+        public IActionResult FindProjectById(long id)
         {
-            Project project = await _projectRepository.FindById(id);
+            var project =  _projectService.FindById(id).Result;
             if (project == null)
                 return NotFound();
-            return Ok(project);
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (role == "ROLE_ADMIN")
+            {
+                return Ok(project);
+            }
+
+            if (role == "ROLE_USER")
+            {
+                if (project.IsPrivate)
+                {
+                    IEnumerable<User> members = _userService.FindAllUsersInProject(project);
+                    if (members.FirstOrDefault(u => u.Email == User.Identity.Name) == null)
+                        return Forbid();
+                }
+                return Ok(project);
+            }
+            
+            if (role == null)
+            {
+                if (project.IsPrivate)
+                    return Forbid();
+                return Ok(project);
+            }
+            
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public async System.Threading.Tasks.Task RemoveProjectById(long id)
+        public IActionResult RemoveProject(long id)
         {
-            await _projectRepository.RemoveById(id);
-        }
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var project = _projectService.FindById(id).Result;
+            if (project == null)
+                return NotFound("project not found");
+            
+            if (role == "ROLE_ADMIN")
+            {
+                _projectService.Remove(project);
+                return Ok();
+            }
 
-        [HttpPut]
-        [Route("{id}")]
-        public async System.Threading.Tasks.Task UpdateProject(Project project)
-        {
-            await _projectRepository.Update(project);
+            if (role == "ROLE_USER")
+            {
+                var user = _userService.FindByEmail(User.Identity.Name);
+                if (user.Id != project.CreatorId)
+                    return Unauthorized("you can't delete this project");
+                _projectService.Remove(project);
+                return Ok();
+            }
+
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
 
         [HttpPost]
-        [Route("create")]
         [ValidateModel]
-        public async Task<ActionResult> CreateProject(CreateProjectForm form)
+        public IActionResult CreateProject(CreateProjectForm form)
         {
-            long creatorId = 1;
-            Project project = form.ToProject();
+            var project = form.ToProject();
+            var user = _userService.FindByEmail(User.Identity.Name);
 
-            try
-            {
-                await _projectRepository.Save(project);
-                return Ok("nice");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            project.CreatorId = user.Id;
+
+            long id =  _projectService.Save(project).Result;
+            project.Id = id;
+
+            return Created($"/api/projects/{id}", project); // should return id
         }
+        
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateProject(long id, Project project)
+        {
+            var role = User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Role)?.Value;
+            project.Id = id;
+            if (role == "ROLE_ADMIN")
+            {
+                await _projectService.Update(project);
+                return Ok();
+            }
+
+            User user = _userService.FindByEmail(User.Identity.Name);
+            if (role == "ROLE_USER")
+            {
+                Project targetProject = _projectService.FindById(id).Result;
+                if (targetProject == null)
+                    return BadRequest("project was not found");
+                if (targetProject.CreatorId != user.Id)
+                    return Unauthorized();
+
+                await _projectService.Update(project);
+                return Ok();
+            }
+
+            return StatusCode((int) HttpStatusCode.InternalServerError);
+        }
+
 
         [HttpPost]
         [Route("{id}/users")]
-        // [Authorize(Roles = "ROLE_ADMIN")]
         public IActionResult AssignUserToProject(long id, [FromQuery(Name = "userId")] long userId)
         {
-            _projectService.AddUserToProject(id, userId, User.Identity);
             throw new NotImplementedException();
         }
         

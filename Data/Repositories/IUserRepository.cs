@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using pm.Models;
-using project_managment.Services;
 
 namespace project_managment.Data.Repositories
 {
@@ -8,5 +8,6 @@ namespace project_managment.Data.Repositories
     { 
         Task<User> FindUserByEmail(string email);
         Task<string> FindRoleByUserId(long id);
+        Task<IEnumerable<User>> FindUsersInProject(long projectId);
     }
 }

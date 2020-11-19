@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using pm.Models;
 
@@ -40,11 +42,11 @@ namespace project_managment.Data.Repositories.RepositoryImpl
                     await connection.QueryAsync<User>(sql));
         }
 
-        public async System.Threading.Tasks.Task Save(User user)
+        public async Task<long> Save(User user)
         {
             string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
-                           $"({ObjectFieldsWithoutIdString})";
-            await WithConnection(async (connection) => { await connection.ExecuteAsync(sql, user); });
+                           $"({ObjectFieldsWithoutIdString}) RETURNING id";
+            return await WithConnection<long>(async (connection) =>  await connection.ExecuteScalarAsync<long>(sql, user) );
         }
 
         public async System.Threading.Tasks.Task Remove(User user)
@@ -80,6 +82,13 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<string>(async connection =>
                 await connection.QueryFirstAsync<string>(sql, new {Id = id}) 
             );
+        }
+
+        public async Task<IEnumerable<User>> FindUsersInProject(long projectId)
+        {
+            var sql = $@"SELECT {UserMappingString} from {TableName} where id in (SELECT user_id FROM project_user WHERE project_id = @projectId)";
+            return await WithConnection<IEnumerable<User>>(async (connection) =>
+                await connection.QueryAsync<User>(sql, new {projectId = projectId}));
         }
 
         public async System.Threading.Tasks.Task Update(User entity)

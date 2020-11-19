@@ -60,6 +60,12 @@ namespace project_managment.Data.Repositories.RepositoryImpl
                 }));
         }
 
+        public async Task<IEnumerable<Project>> FindAllNotPrivate(int page, int size)
+        {
+            var sql = $@"SELECT {ProjectMappingString} FROM {TableName} WHERE is_private = false ORDER BY id OFFSET {size * page} LIMIT {size}";
+            return await WithConnection<IEnumerable<Project>>(async (connection) => await connection.QueryAsync<Project>(sql));
+        }
+
         public async  System.Threading.Tasks.Task Remove(Project entity)
         {
             if (entity?.Id == null)
@@ -83,17 +89,16 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             });
         }
 
-        public async System.Threading.Tasks.Task Save(Project entity)
+        public async Task<long> Save(Project entity)
         {
             if (entity == null)
                 throw new Exception();
                 
             var sql= $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
-                         $@"({ObjectFieldsWithoutIdString})";
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, entity);
-            });
+                         $@"({ObjectFieldsWithoutIdString}) RETURNING Id";
+            return await WithConnection<long>(async (connection) =>
+                await connection.ExecuteScalarAsync<long>(sql, entity)
+            );
             
             
             
@@ -103,8 +108,33 @@ namespace project_managment.Data.Repositories.RepositoryImpl
         {
             if (entity?.Id == null)
                 throw new Exception();
-            
-            var sql= $@"UPDATE {TableName} SET ({TableFieldsString}) = ({ObjectFieldsString}) WHERE id = @Id";
+            List<string> tableColumns = new List<string>();
+            List<string> objectFields = new List<string>();
+
+            if (entity.IsPrivate != null)
+            {
+                tableColumns.Add("is_private");
+                objectFields.Add("@IsPrivate");
+            }
+
+            if (entity.Description != null)
+            {
+                tableColumns.Add("description");
+                objectFields.Add("@Description");
+            }
+
+            if (entity.Name != null)
+            {
+                tableColumns.Add("name");
+                objectFields.Add("@Name");
+            }
+
+            if (tableColumns.Count == 0)
+                return;
+
+            string test = String.Join(", ", tableColumns);
+
+            var sql= $@"UPDATE {TableName} SET ({String.Join(", ", tableColumns)}) = ({String.Join(",", objectFields)}) WHERE id = @Id";
 
             await WithConnection(async (connection) =>
             {

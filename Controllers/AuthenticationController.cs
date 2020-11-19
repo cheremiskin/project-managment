@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using DevOne.Security.Cryptography.BCrypt;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
 using project_managment.Data.Repositories;
 using project_managment.Filters;
 using project_managment.Forms;
-using project_managment.Services;
-using Synercoding.FormsAuthentication;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
 
 namespace project_managment.Controllers

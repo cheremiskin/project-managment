@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Task = pm.Models.Task;
@@ -62,14 +64,13 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             });
         }
 
-        public async System.Threading.Tasks.Task Save(Task entity)
+        public async Task<long> Save(Task entity)
         {
             string sql = $@"INSERT INTO {TableName}({TableFieldsWithoutIdString}) VALUES " +
-                         $@"({ObjectFieldsWithoutIdString})";
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, entity);
-            });
+                         $@"({ObjectFieldsWithoutIdString}) RETURNING id";
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<long>(sql, entity)
+            );
         }
 
         public async System.Threading.Tasks.Task Update(Task entity)

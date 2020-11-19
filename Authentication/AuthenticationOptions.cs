@@ -9,7 +9,7 @@ namespace project_managment.Authentication
         public const string Issuer = "PmCorp";
         public const string Audience = "Pm";
         private const string Key = "A32C3F9H7HD83BALV83OCD910D83JAHFB3KI";
-        public const int Lifetime = 90;
+        public const int Lifetime = 900_000;
         public const string SecurityAlgorithm = SecurityAlgorithms.HmacSha256;
 
         public static SymmetricSecurityKey GetSymmetricSecurityKey()

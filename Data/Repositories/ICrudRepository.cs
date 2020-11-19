@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace project_managment.Data.Repositories
@@ -8,7 +9,7 @@ namespace project_managment.Data.Repositories
         Task<E> FindById(long id);
         Task<IEnumerable<E>> FindAll();
         Task<IEnumerable<E>> FindAll(int page, int size);
-        Task Save(E entity);
+        Task<long> Save(E entity);
         Task Remove(E entity);
         Task RemoveById(long id);
         Task Update(E entity);

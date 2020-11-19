@@ -16,8 +16,6 @@ using project_managment.Data.Repositories;
 using project_managment.Data.Repositories.RepositoryImpl;
 using project_managment.Data.Services;
 using project_managment.Data.Services.ServiceImpl;
-using project_managment.Services;
-using project_managment.Services.ServiceImpl;
 using Synercoding.FormsAuthentication;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
 using EncryptionMethod = Synercoding.FormsAuthentication.EncryptionMethod;

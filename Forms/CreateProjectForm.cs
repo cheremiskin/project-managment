@@ -26,7 +26,7 @@ namespace project_managment.Forms
 
             project.Name = Name;
             project.Description = Description;
-            project.CreatedAt = new DateTime();
+            project.CreatedAt = DateTime.Now;
             project.IsPrivate = IsPrivate;
 
             return project;

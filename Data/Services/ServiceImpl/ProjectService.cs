@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
 using pm.Models;
 using project_managment.Data.Repositories;
-using project_managment.Data.Services;
 using Task = System.Threading.Tasks.Task;
 
-namespace project_managment.Services.ServiceImpl
+namespace project_managment.Data.Services.ServiceImpl
 {
     public class ProjectService : IProjectService
     {
@@ -32,50 +31,40 @@ namespace project_managment.Services.ServiceImpl
             return _projectRepository.FindAll(page, size);
         }
 
-        public Task<Project> FindById(long id, IIdentity identity)
+        public async Task<Project> FindById(long id)
         {
-            return _projectRepository.FindById(id);
+            return await _projectRepository.FindById(id);
         }
 
-        public Task Remove(Project entity,IIdentity identity )
+
+        public Task Remove(Project entity)
         {
             return _projectRepository.Remove(entity);
         }
 
-        public Task RemoveById(long id,IIdentity identity )
+        public Task RemoveById(long id)
         {
             return _projectRepository.RemoveById(id);
         }
 
-        public Task Save(Project entity,IIdentity identity )
+        public Task<long> Save(Project entity)
         {
             return _projectRepository.Save(entity);
         }
 
-        public Task Update(Project entity, IIdentity identity)
+        public Task Update(Project entity)
         {
             return _projectRepository.Update(entity);
         }
 
-        public Task<IEnumerable<Project>> FindAllNotPrivate(int page, int size)
+        public IEnumerable<Project> FindAllNotPrivate(int page, int size)
         {
-            throw new System.NotImplementedException();
+            return _projectRepository.FindAllNotPrivate(page, size).Result;
         }
 
-        public async Task AddTaskToProject(Project project, pm.Models.Task task, IIdentity identity )
+        public async Task AddTaskToProject(Project project, pm.Models.Task task)
         {
-            // check if the user has rights for operation (should pass user object?)
-            // change task.ProjectId property to project.Id
-            // update task using TaskRepository
-            User client = await GetUserByIdentity(identity);
-            if (client == null || client.Id != project.CreatorId || !identity.IsAuthenticated)
-            {
-                return; // forbidden 403
-            }
-
-            task.ProjectId = project.Id;
-            await _taskRepository.Update(task);
-
+            throw new NotImplementedException();
         }
 
         public Task AddUserToProject(Project project, User user, IIdentity identity)
@@ -83,27 +72,12 @@ namespace project_managment.Services.ServiceImpl
             throw new System.NotImplementedException();
         }
 
-        public async Task AddUserToProject(long projectId, long userId, IIdentity identity )
+        public async Task AddUserToProject(long projectId, long userId)
         {
-            User user = await _userRepository.FindById(userId);
-            if (user == null)
-                return; // bad request 400
-            
-            Project project = await _projectRepository.FindById(projectId);
-            if (project == null)
-                return; // bad request 400 
-            
-            User client = await GetUserByIdentity(identity);
-            if (client == null || client.Id != project.CreatorId)
-            {
-                return; // forbidden 403
-            }
-
-            await _projectRepository.LinkUserAndProject(user, project);
-            return; // 201
+            throw new NotImplementedException();
         }
 
-        public Task RemoveTaskFromProject(Project project, pm.Models.Task task, IIdentity identity)
+        public Task RemoveTaskFromProject(Project project, pm.Models.Task task)
         {
             // check if user has rights
             // remove task using TaskRepository
@@ -111,7 +85,7 @@ namespace project_managment.Services.ServiceImpl
             throw new System.NotImplementedException();
         }
 
-        public Task RemoveUserFromProject(Project project, User user, IIdentity identity)
+        public Task RemoveUserFromProject(Project project, User user)
         {
             
             // check if user has rights
