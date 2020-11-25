@@ -2,10 +2,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
+using pm.Models.Links;
+using project_managment.Data.Dto;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
 using project_managment.Filters;
@@ -77,7 +80,7 @@ namespace project_managment.Controllers
         [ValidateModel]
         public IActionResult PostTask([FromBody]CreateTaskForm form, [Required, FromQuery(Name = "projectId")] long projectId)
         {
-             var project = _projectRepository.FindById(projectId).Result;
+            var project = _projectRepository.FindById(projectId).Result;
             if (project == null)
                 return NotFound(ProjectException.NotFound());
             
@@ -97,9 +100,82 @@ namespace project_managment.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult DeleteTask(long id)
+        public async Task<IActionResult> DeleteTask(long id)
         {
-            throw new NotImplementedException(); 
+            var client = GetClientUser();
+            var role = GetClientRoleClaim()?.Value;
+            if (role == Role.RoleAdmin)
+            {
+                await _taskRepository.UnlinkAllUsersFromTask(id);
+                await _taskRepository.RemoveById(id);
+
+                return NoContent();
+            }
+            var task = await _taskRepository.FindById(id); /* TODO тут от таска мне нужен только ProjectId,
+                                                            мб стоит добавить метод
+                                                            в репозиторий который будет доставать
+                                                            его и сразу искать нужный проект */
+            var project = await _projectRepository.FindById(task.ProjectId);
+
+            if (project.CreatorId != client.Id)
+                return Unauthorized(TaskException.AccessDenied());
+
+            await _taskRepository.UnlinkAllUsersFromTask(id);
+            await _taskRepository.RemoveById(id);
+
+            return NoContent();
+        }
+
+        [HttpGet]
+        [Route("{id}/users")]
+        public IActionResult GetTaskUsers(long id)
+        {
+            var role = GetClientRoleClaim()?.Value;
+            if (role == Role.RoleAdmin)
+            {
+                var members = _userRepository.FindAllUsersInTask(id).Result; // вероятно стоит проверять существование таска
+                return Ok(members.Select(u => new UserDto(u)));
+            }
+
+            var task = _taskRepository.FindById(id).Result;
+            if (task == null)
+                return NotFound(TaskException.NotFound());
+            var parentProject = _projectRepository.FindById(task.ProjectId).Result;
+            
+            var client = GetClientUser();
+            var projectMembers = _userRepository.FindAllUsersInProject(parentProject.Id).Result;
+            if (projectMembers.FirstOrDefault(u => u.Id == client.Id) != null)
+            {
+                var taskMembers = _userRepository.FindAllUsersInTask(id).Result;
+                return Ok(taskMembers.Select(u => new UserDto(u)));
+            }
+
+            return Unauthorized(TaskException.AccessDenied());
+        }
+
+        [HttpPost]
+        [Route("{taskId}/users")]
+        public IActionResult PostTaskUser([FromRoute(Name = "taskId")] long taskId,
+            [FromQuery(Name = "userId"), Required] long userId)
+        {
+            var role = GetClientRoleClaim()?.Value;
+            if (role == Role.RoleAdmin)
+            {
+                var link = _taskRepository.LinkUserAndTask(userId, taskId).Result;
+                if (link == null)
+                    return NotFound(TaskException.LinkFailed());
+                return Created("", link);
+            }
+
+            var project = _projectRepository.FindProjectByTaskId(taskId).Result;
+            var client = GetClientUser();
+            if (project.CreatorId != client.Id)
+                return Unauthorized(ProjectException.AccessDenied());
+
+            var link1 = _taskRepository.LinkUserAndTask(userId, taskId).Result;
+            if (link1 == null)
+                return NotFound(TaskException.LinkFailed());
+            return Created("", link1);
         }
         
         

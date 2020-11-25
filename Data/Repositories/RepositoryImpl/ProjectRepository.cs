@@ -67,27 +67,20 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<IEnumerable<Project>>(async (connection) => await connection.QueryAsync<Project>(sql));
         }
 
-        public async  System.Threading.Tasks.Task Remove(Project entity)
+        public async  Task<bool> Remove(Project entity)
         {
             if (entity?.Id == null)
-                throw new Exception();
-            
-            var sql= $@"DELETE FROM {TableName} WHERE id = @id";
-
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id = entity.Id });
-            });
+                return false;
+            return await RemoveById(entity.Id);
         }
 
-        public async System.Threading.Tasks.Task RemoveById(long id)
+        public async Task<bool> RemoveById(long id)
         {
-            var sql= $@"DELETE FROM {TableName} WHERE id = @id";
+            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id) SELECT COUNT(*) > 0 FROM deleted";
 
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id });
-            });
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new { id })
+            );
         }
 
         public async Task<long> Save(Project entity)
@@ -174,6 +167,14 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<bool>(async (connection) =>
                 await connection.ExecuteScalarAsync<bool>(sql, new {userId = userId, projectId = projectId}) 
             );
+        }
+
+        public async Task<Project> FindProjectByTaskId(long taskId)
+        {
+            var sql =
+                $@"SELECT {ProjectMappingString} FROM {TableName} WHERE id IN (SELECT project_id FROM tasks WHERE id = @taskId)";
+            return await WithConnection(async connection =>
+                await connection.QueryFirstOrDefaultAsync<Project>(sql, new {taskId}));
         }
     }
 }

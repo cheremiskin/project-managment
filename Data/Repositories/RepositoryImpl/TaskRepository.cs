@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using pm.Models.Links;
 using Task = pm.Models.Task;
 
 // using System.Threading.Tasks;
@@ -44,24 +45,18 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection(async (connection) => await connection.QueryFirstOrDefaultAsync<Task>(sql, new { id = id }));
         }
 
-        public async  System.Threading.Tasks.Task Remove(Task entity)
+        public async  Task<bool> Remove(Task entity)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
-
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id = entity.Id });
-            });
+            return await RemoveById(entity.Id);
         }
 
-        public async System.Threading.Tasks.Task RemoveById(long id)
+        public async Task<bool> RemoveById(long id)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
+            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id) SELECT COUNT(*) > 0 FROM deleted";
 
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id });
-            });
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new { id })
+            );
         }
 
         public async Task<long> Save(Task entity)
@@ -94,6 +89,36 @@ namespace project_managment.Data.Repositories.RepositoryImpl
         {
             var sql = $@"SELECT {TaskMappingString} FROM {TableName} WHERE project_id = @projectId";
             return await WithConnection(async connection => await connection.QueryAsync<Task>(sql, new {projectId = projectId}));
+        }
+
+        public async Task<TaskUser> LinkUserAndTask(long userId, long taskId)
+        {
+            var sql = $@"INSERT INTO task_user(user_id, task_id) VALUES (@userId, @taskId) RETURNING user_id AS UserId, task_id AS TaskId";
+            try
+            {
+                return await WithConnection(async (connection) =>
+                    await connection.QuerySingleAsync<TaskUser>(sql, new {userId = userId, taskId = taskId}));
+            }
+            catch (Exception ignored)
+            {
+                return null;
+            }
+            
+        }
+
+        public async Task<bool> UnlinkUserAndTask(long userId, long taskId)
+        {
+            var sql = "WITH deleted as (DELETE FROM task_user WHERE task_id = @taskId AND user_id = @userId RETURNING *) SELECT COUNT(*) FROM deleted";
+            return await WithConnection<bool>(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new {userId = userId, taskId = taskId}) 
+            );
+        }
+
+        public async Task<bool> UnlinkAllUsersFromTask(long taskId)
+        {
+            var sql = $@"WITH deleted AS (DELETE FROM task_user WHERE task_id = @taskId RETURNING *) SELECT COUNT(*) > 0 FROM deleted";
+            return await WithConnection<bool>(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new {taskId = taskId}));
         }
     }
 }

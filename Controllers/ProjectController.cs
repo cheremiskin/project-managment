@@ -118,7 +118,7 @@ namespace project_managment.Controllers
             return Created($"/api/projects/{id}", project); // should return id
         }
         
-        [HttpPut]
+        [HttpPatch]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProject(long id, Project project)
         {

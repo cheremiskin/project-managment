@@ -29,7 +29,7 @@ CREATE TABLE roles(
     name VARCHAR(16) NOT NULL
 );
 
-INSERT INTO roles(id, name) VALUES (1, "ROLE_ADMIN"), (2, "ROLE_USER"), (3, "ROLE_GUEST");
+INSERT INTO roles(id, name) VALUES (1, 'ROLE_ADMIN'), (2, 'ROLE_USER');
 
 CREATE TABLE users(
     id BIGINT PRIMARY KEY DEFAULT nextval('users_id_seq'),

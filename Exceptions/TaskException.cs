@@ -30,5 +30,14 @@ namespace project_managment.Exceptions
                 Message = "unable to save the task"
             };
         }
+
+        public static TaskException LinkFailed()
+        {
+            return new TaskException
+            {
+                Code = "task_user_link_failed",
+                Message = "unable to link user and task"
+            };
+        }
     }
 }

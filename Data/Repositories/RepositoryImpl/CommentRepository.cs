@@ -47,24 +47,20 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection(async (connection) => await connection.QueryAsync<Comment>(sql, new {task_id=taskId}));
         }
 
-        public async  System.Threading.Tasks.Task Remove(Comment entity)
+        public async  Task<bool> Remove(Comment entity)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
-
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id = entity.Id });
-            });
+            if (entity?.Id == null)
+                return false;
+            return await RemoveById(entity.Id);
         }
 
-        public async System.Threading.Tasks.Task RemoveById(long id)
+        public async Task<bool> RemoveById(long id)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
+            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id) SELECT COUNT(*) > 0 FROM deleted";
 
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id });
-            });
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new { id })
+            );
         }
 
         public async Task<long> Save(Comment entity)

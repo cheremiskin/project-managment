@@ -30,7 +30,7 @@ namespace project_managment.Forms
                 Content = this.Content,
                 CreationDate = DateTime.Now,
                 ExpirationDate = this.ExpirationDate,
-                ExecutionTime = this.ExecutionTime
+                ExecutionTime = this.ExecutionTime,
             };
 
             return task;

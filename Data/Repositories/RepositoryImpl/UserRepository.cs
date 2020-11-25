@@ -49,24 +49,18 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<long>(async (connection) =>  await connection.ExecuteScalarAsync<long>(sql, user) );
         }
 
-        public async System.Threading.Tasks.Task Remove(User user)
+        public async Task<bool> Remove(User user)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
-
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id = user.Id });
-            });
+            return await RemoveById(user.Id);
         }
 
-        public async System.Threading.Tasks.Task RemoveById(long id)
+        public async Task<bool> RemoveById(long id)
         {
-            string sql = $@"DELETE FROM {TableName} WHERE id = @id";
+            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id) SELECT COUNT(*) > 0 FROM deleted";
 
-            await WithConnection(async (connection) =>
-            {
-                await connection.ExecuteAsync(sql, new { id });
-            });
+            return await WithConnection(async (connection) =>
+                await connection.ExecuteScalarAsync<bool>(sql, new { id })
+            );
         }
 
         public async Task<User> FindUserByEmail(string email)
@@ -90,6 +84,15 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<IEnumerable<User>>(async (connection) =>
                 await connection.QueryAsync<User>(sql, new {projectId = projectId}));
         }
+
+        public async Task<IEnumerable<User>> FindAllUsersInTask(long taskId)
+        {
+            var sql =
+                $@"SELECT {UserMappingString} from {TableName} WHERE id IN (SELECT DISTINCT user_id FROM task_user WHERE task_id = @taskId)";
+            return await WithConnection(async (connection) =>
+                await connection.QueryAsync<User>(sql, new {taskId}));
+        }
+        
 
         public async System.Threading.Tasks.Task Update(User entity)
         {

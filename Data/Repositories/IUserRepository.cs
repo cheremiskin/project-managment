@@ -9,5 +9,6 @@ namespace project_managment.Data.Repositories
         Task<User> FindUserByEmail(string email);
         Task<string> FindRoleByUserId(long id);
         Task<IEnumerable<User>> FindAllUsersInProject(long projectId);
+        Task<IEnumerable<User>> FindAllUsersInTask(long taskId);
     }
 }
