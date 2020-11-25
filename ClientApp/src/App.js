@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { FetchData } from './pages/FetchData';
 import { Counter } from './pages/Counter';
+import { User } from './pages/User';
 import './assets/styles/App.css';
 
 export default class App extends Component {
@@ -15,6 +16,7 @@ export default class App extends Component {
         <Route exact path='/' component={Home} />
         <Route path='/counter' component={Counter} />
         <Route path='/fetch-data' component={FetchData} />
+        <Route path='/user/:id' component={User} />
       </Layout>
     );
   }

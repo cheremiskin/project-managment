@@ -99,7 +99,7 @@ ON DELETE CASCADE;
  
 CREATE TABLE task_user(
     task_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL
 );
 
 ALTER TABLE task_user ADD CONSTRAINT task_user_unique 

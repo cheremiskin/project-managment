@@ -31,6 +31,7 @@ namespace project_managment.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<UserDto>>> GetUsers([Required, FromQuery(Name = "page")] int page,
                                                 [Required, FromQuery(Name = "size")] int size)
         {
@@ -40,6 +41,7 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [Route("{id}")]
+        [AllowAnonymous]
         public ActionResult<UserDto> GetUser(long id)
         {
             var user = _userRepository.FindById(id).Result;
