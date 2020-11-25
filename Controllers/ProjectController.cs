@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +25,8 @@ namespace project_managment.Controllers
 
         private readonly IUserRepository _userRepository;
         private readonly IProjectRepository _projectRepository;
-        public ProjectController(IProjectRepository projectRepository, IUserRepository userRepository) : base(userRepository)
+        public ProjectController(IProjectRepository projectRepository, IUserRepository userRepository, ITaskRepository taskRepository, ICommentRepository commentRepository) : 
+                base(userRepository, projectRepository, taskRepository, commentRepository)
         {
             _projectRepository = projectRepository;
             _userRepository = userRepository;
@@ -31,14 +34,14 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> FindAllProjects([Required,FromQuery(Name = "page")] int page, 
-                                                            [Required, FromQuery(Name = "size")] int size)
+        public async Task<IActionResult> FindAllProjects([FromQuery(Name = "page")] int page = 0, 
+                                                            [FromQuery(Name = "size")] int size = 10)
         {
             var claim = GetClientRoleClaim();
             IEnumerable<Project> projects = null;
-            if (claim == null || claim.Value == "ROLE_USER")
+            if (claim == null || claim.Value == Role.RoleUser)
                 projects = await _projectRepository.FindAllNotPrivate(page, size);
-            if (claim != null && claim.Value == "ROLE_ADMIN")
+            if (claim != null && claim.Value == Role.RoleAdmin)
                 projects = await _projectRepository.FindAll(page, size);
             
             return Ok(projects);
@@ -47,59 +50,32 @@ namespace project_managment.Controllers
         [HttpGet]
         [Route("{id}")]
         [AllowAnonymous]
-        public IActionResult FindProjectById(long id)
+        public async Task<IActionResult> FindProjectById(long id)
         {
-            var project =  _projectRepository.FindById(id).Result;
-            if (project == null)
-                return NotFound(ProjectException.NotFound());
-            var role = GetClientRoleClaim()?.Value;
-            switch (role)
+            var accessLevel = await GetAccessLevelForProject(id);
+            switch (accessLevel)
             {
-                case "ROLE_ADMIN":
-                    return Ok(project);
-                case "ROLE_USER" when !project.IsPrivate:
-                    return Ok(project);
-                case "ROLE_USER":
-                {
-                    var members = _userRepository.FindAllUsersInProject(project.Id).Result;
-                    if (members.FirstOrDefault(u => u.Email == User.Identity.Name) == null)
-                        return Forbid();
-                    return Ok(project);
-                }
-                case null when project.IsPrivate:
-                    return Unauthorized(ProjectException.AccessDenied());
-                case null:
-                    return Ok(project);
-                default:
-                    return StatusCode((int) HttpStatusCode.InternalServerError);
+               case AccessLevel.Admin: case AccessLevel.Creator: case AccessLevel.Member: case AccessLevel.Anonymous:
+                   return Ok(Cache.Project ?? await _projectRepository.FindById(id));
+               case AccessLevel.None:
+                   throw ProjectException.AccessDenied();
             }
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult RemoveProject(long id)
+        public async Task<IActionResult> RemoveProject(long id)
         {
-            var role = GetClientRoleClaim()?.Value;
-            var project = _projectRepository.FindById(id).Result;
-            if (project == null)
-                return NotFound(ProjectException.NotFound());
-            
-            if (role == "ROLE_ADMIN")
+            var accessLevel = await GetAccessLevelForProject(id);
+            switch (accessLevel)
             {
-                _projectRepository.Remove(project);
-                return NoContent();
+                case AccessLevel.Admin: case AccessLevel.Creator:
+                    await _projectRepository.RemoveById(id);
+                    return NoContent();
+                default:
+                    throw ProjectException.AccessDenied();
             }
-
-            if (role == "ROLE_USER")
-            {
-                var user = _userRepository.FindUserByEmail(User.Identity.Name).Result;
-                if (user.Id != project.CreatorId)
-                    return Unauthorized(ProjectException.DeletionDenied());
-                _projectRepository.Remove(project);
-                return Ok();
-            }
-
-            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
 
         [HttpPost]
@@ -122,86 +98,68 @@ namespace project_managment.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateProject(long id, Project project)
         {
-            var role = GetClientRoleClaim()?.Value;
-            project.Id = id;
-            if (role == "ROLE_ADMIN")
+            var accessLevel = await GetAccessLevelForProject(id);
+            switch (accessLevel)
             {
-                await _projectRepository.Update(project);
-                return Ok();
+                case AccessLevel.Admin: case AccessLevel.Creator:
+                    project.Id = id;
+                    await _projectRepository.Update(project);
+                    return NoContent();
+                default:
+                    throw ProjectException.UpdateDenied();
             }
-
-            var user = GetClientUser();
-            if (role == "ROLE_USER")
-            {
-                var targetProject = _projectRepository.FindById(id).Result;
-                if (targetProject == null)
-                    return NotFound(ProjectException.NotFound());
-                if (targetProject.CreatorId != user.Id)
-                    return Unauthorized(ProjectException.UpdateDenied());
-
-                await _projectRepository.Update(project);
-                return Ok();
-            }
-
-            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
         
         
         [HttpGet]
         [Route("{projectId}/users")]
-        public IActionResult GetMembersOfProject([Required, FromRoute(Name = "projectId")] long projectId)
+        public async Task<IActionResult> GetMembersOfProject([Required, FromRoute(Name = "projectId")] long projectId)
         {
-            var project = _projectRepository.FindById(projectId).Result;
-
-            if (project == null)
-                return NotFound(ProjectException.NotFound());
-            var client = GetClientUser();
-            var role = GetClientRoleClaim()?.Value;
-
-            var members = _userRepository.FindAllUsersInProject(projectId).Result.Select(u => new UserDto(u));
-
-            if (!project.IsPrivate || role == Role.RoleAdmin)
-                return Ok(members);
-
-            if (members.FirstOrDefault(u => u.Id == client.Id) != null)
-                return Ok(members);
-
-            return Unauthorized(ProjectException.AccessDenied());
+            var accessLevel = await GetAccessLevelForProject(projectId);
+            switch (accessLevel)
+            {
+                case AccessLevel.Admin: case AccessLevel.Member: case AccessLevel.Creator: case AccessLevel.Anonymous:
+                    return Ok((Cache.ProjectMembers ?? await _userRepository.FindAllUsersInProject(projectId)).Select(u => new UserDto(u)));
+                default:
+                    throw ProjectException.AccessDenied();
+            } 
         }
         
         [HttpPost]
         [Route("{projectId}/users")]
-        public IActionResult PostAssignUserToProject([Required, FromRoute(Name = "projectId")] long projectId, 
+        public async Task<IActionResult> PostAssignUserToProject([Required, FromRoute(Name = "projectId")] long projectId, 
                                                     [Required, FromQuery(Name = "userId")] long userId)
         {
-            var project = _projectRepository.FindById(projectId).Result;
-            if (project == null)
-                return NotFound("project was not found");
-            var role = GetClientRoleClaim()?.Value;
-            var client = GetClientUser();
-            if (role != Role.RoleAdmin && project.CreatorId != client.Id)
-                return Unauthorized(ProjectException.AddMemberDenied());
-                
-
-            var link = _projectRepository.LinkUserAndProjectById(userId, projectId).Result;
-            return link == null ? (IActionResult) BadRequest(ProjectException.UserProjectLinkCreationFailed()) : Created("", link);
+            var accessLevel = await GetAccessLevelForProject(projectId);
+            switch (accessLevel)
+            {
+                case AccessLevel.Admin: case AccessLevel.Creator:
+                    var link = _projectRepository.LinkUserAndProjectById(userId, projectId).Result;
+                    if (link == null)
+                        throw ProjectException.UserProjectLinkCreationFailed();
+                    return Created("", link);
+                default:
+                    throw ProjectException.AccessDenied();
+            }
+            
         }
 
         [HttpDelete]
         [Route("{projectId}/users")]
-        public IActionResult DeleteLinkUserProject([Required, FromRoute(Name = "projectId")] long projectId,
+        public async Task<IActionResult> DeleteLinkUserProject([Required, FromRoute(Name = "projectId")] long projectId,
                                             [Required, FromQuery(Name = "userId")] long userId)
         {
-            var project = _projectRepository.FindById(projectId).Result;
-            if (project == null)
-                return NotFound(ProjectException.NotFound());
-            var role = GetClientRoleClaim()?.Value;
-            var client = GetClientUser();
-            if (role != Role.RoleAdmin && project.CreatorId != client.Id)
-                return Unauthorized(ProjectException.DeleteMemberDenied());
-
-            bool result = _projectRepository.UnlinkUserAndProjectById(userId, projectId).Result;
-            return result ? (IActionResult) NoContent() : BadRequest(ProjectException.UserProjectLinkDeletionFailed());
+            var accessLevel = await GetAccessLevelForProject(projectId);
+            switch (accessLevel)
+            {
+                case AccessLevel.Admin: case AccessLevel.Creator:
+                    bool result = await _projectRepository.UnlinkUserAndProjectById(userId, projectId);
+                    if (!result)
+                        throw ProjectException.UserProjectLinkDeletionFailed();
+                    return NoContent();
+                default:
+                    throw ProjectException.AccessDenied();
+            }
         }
     }
 }

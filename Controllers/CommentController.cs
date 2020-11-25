@@ -1,14 +1,13 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
+using project_managment.Filters;
 using project_managment.Forms;
-using Task = pm.Models.Task;
 
 namespace project_managment.Controllers
 {
@@ -22,7 +21,8 @@ namespace project_managment.Controllers
         private readonly IProjectRepository _projectRepository;
 
         public CommentController(ICommentRepository commentRepository, ITaskRepository taskRepository,
-            IProjectRepository projectRepository, IUserRepository userRepository) : base(userRepository)
+            IProjectRepository projectRepository, IUserRepository userRepository) :
+            base(userRepository, projectRepository, taskRepository, commentRepository)
         {
             _commentRepository = commentRepository;
             _taskRepository = taskRepository;
@@ -31,80 +31,61 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> getComments([Required, FromQuery(Name = "taskId")] long taskId)
+        [ExceptionFilter]
+        public async Task<IActionResult> GetComments([Required, FromQuery(Name = "taskId")] long taskId)
         {
-            var task = await _taskRepository.FindById(taskId);
-            if (task == null)
-                return NotFound(TaskException.NotFound());
-            var project = await _projectRepository.FindById(task.ProjectId);
-            var role = GetClientRoleClaim()?.Value; 
-
-            if (!project.IsPrivate || role == Role.RoleAdmin)
+            var accessLevel = await GetAccessLevelForTask(taskId);
+            
+            switch (accessLevel)
             {
-                var comments = await _commentRepository.FindCommentsByTaskId(taskId);
-                return Ok(comments);
+                case AccessLevel.Admin: case AccessLevel.Creator : case AccessLevel.Member: case AccessLevel.Anonymous:
+                    var comments = await _commentRepository.FindCommentsByTaskId(taskId);
+                    return Ok(comments);
+                case AccessLevel.None:
+                    throw CommentException.AccessDenied();
             }
-
-            var user = GetClientUser();
-            if (user == null)
-                return Unauthorized(ProjectException.AccessDenied());
-
-            var members = _userRepository.FindAllUsersInProject(project.Id).Result;
-            if (members.FirstOrDefault(m => m.Id == user.Id) == null) 
-                return Unauthorized(ProjectException.AccessDenied());
-
-            var commentList = await _commentRepository.FindCommentsByTaskId(taskId);
-            return Ok(commentList.OrderBy(c => c.CreationDate));
+            
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
+        
 
         [HttpPost]
-        public async Task<IActionResult> postComment([Required, FromQuery(Name = "taskId")] long taskId,
+        public async Task<IActionResult> PostComment([Required, FromQuery(Name = "taskId")] long taskId,
                                                         [FromBody] CreateCommentForm form)
         {
-            var user = GetClientUser();
-            var role = GetClientRoleClaim()?.Value;
-
-            var task = await _taskRepository.FindById(taskId);
-            if (task == null)
-                return NotFound(TaskException.NotFound());
-
-            var project = await _projectRepository.FindById(task.ProjectId);
-
-            var members = await _userRepository.FindAllUsersInProject(project.Id);
-            if (members.FirstOrDefault(m => m.Id == user.Id) == null && role != Role.RoleAdmin)
-                return Unauthorized(TaskException.AccessDenied());
+            var accessLevel = await GetAccessLevelForTask(taskId);
             
-            var comment = form.ToComment();
-            comment.UserId = user.Id;
-            comment.TaskId = taskId;
-
-            var id = _commentRepository.Save(comment);
-
-            return Created($"/api/comments/{id}", comment);
+            switch (accessLevel)
+            {
+                case AccessLevel.Admin: case AccessLevel.Creator: case AccessLevel.Member:
+                    var comment = form.ToComment();
+                    var userId = GetClientId();
+                    comment.TaskId = taskId;
+                    comment.UserId = userId;
+                    var commentId = await _commentRepository.Save(comment);
+                    return Created($"/api/comments/{commentId}", new {id = commentId});
+                case AccessLevel.Anonymous: case AccessLevel.None:
+                    throw TaskException.AccessDenied();
+            }
+            
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> deleteComment([FromRoute(Name = "id")] long id)
+        public async Task<IActionResult> DeleteComment([FromRoute(Name = "id")] long id)
         {
-            var role = GetClientRoleClaim()?.Value;
-            if (role == Role.RoleAdmin)
+            var accessLevel = await GetAccessLevelForComment(id);
+            switch (accessLevel)
             {
-                await _commentRepository.RemoveById(id);
-                return NoContent();
+               case AccessLevel.Admin: case AccessLevel.Creator:
+                   await _commentRepository.RemoveById(id);
+                   return NoContent();
+               case AccessLevel.Anonymous: case AccessLevel.Member: case AccessLevel.None:
+                   throw CommentException.AccessDenied();
             }
             
-            var user = GetClientUser();
-            var comment = await _commentRepository.FindById(id);
-
-            if (comment == null)
-                return NoContent();
-
-            if (comment.UserId != user.Id)
-                return Unauthorized();
-
-            await _commentRepository.Remove(comment);
-            return NoContent();
+            return StatusCode((int) HttpStatusCode.InternalServerError);
         }
         
     }

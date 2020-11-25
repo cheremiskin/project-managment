@@ -62,6 +62,7 @@ namespace project_managment.Controllers
                 var role = await _userRepository.FindRoleByUserId(user.Id);
 
                 claims.Add( new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim("UserId", user.Id.ToString()));
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, "Token", 
                     ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

@@ -1,4 +1,6 @@
-﻿namespace project_managment.Exceptions
+﻿using System.Net;
+
+namespace project_managment.Exceptions
 {
     public class UserException : BaseException
     {
@@ -7,7 +9,8 @@
             return new UserException
             {
                 Code = "user_not_found",
-                Message = "user doesn't exist"
+                Message = "user doesn't exist",
+                StatusCode = HttpStatusCode.NotFound
             };
         }
         public static UserException CreationDenied()
@@ -15,7 +18,8 @@
             return new UserException
             {
                 Code = "user_creation_denied",
-                Message = "you can't create a user"
+                Message = "you can't create a user",
+                StatusCode = HttpStatusCode.Unauthorized
             };
         }
 
@@ -24,7 +28,8 @@
             return new UserException
             {
                 Code = "user_creation_failed",
-                Message = "invalid data"
+                Message = "invalid data",
+                StatusCode = HttpStatusCode.BadRequest
             };
         }
 
@@ -33,8 +38,11 @@
             return new UserException
             {
                 Code = "user_deletion_failed",
-                Message = "you can't delete this user" 
+                Message = "you can't delete this user" ,
+                StatusCode =  HttpStatusCode.Unauthorized
             };
         }
+
+        private UserException (){}
     }
 }

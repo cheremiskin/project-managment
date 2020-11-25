@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using pm.Models;
@@ -12,7 +13,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "project_not_found",
-                Message = "project doesn't exist"
+                Message = "project doesn't exist",
+                StatusCode = HttpStatusCode.NotFound
             }; 
         }
 
@@ -21,7 +23,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "access_denied",
-                Message = "you can't access this project"
+                Message = "you can't access this project",
+                StatusCode = HttpStatusCode.Unauthorized
             }; 
         }
 
@@ -30,7 +33,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "deletion_denied",
-                Message = "you can't delete project you don't own"
+                Message = "you can't delete project you don't own",
+                StatusCode = HttpStatusCode.Unauthorized
             };
         }
 
@@ -39,7 +43,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "update_denied",
-                Message = "you can't update project you don't own"
+                Message = "you can't update project you don't own",
+                StatusCode = HttpStatusCode.Unauthorized
             };
         }
         
@@ -48,7 +53,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "add_member_denied",
-                Message = "you can't update project you don't own"
+                Message = "you can't update project you don't own",
+                StatusCode = HttpStatusCode.Unauthorized
             };
         }
         public static ProjectException DeleteMemberDenied()
@@ -56,7 +62,9 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "delete_member_denied",
-                Message = "you can't update project you don't own"
+                Message = "you can't update project you don't own",
+                StatusCode = HttpStatusCode.Unauthorized
+                
             };
         }
 
@@ -65,7 +73,8 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "unlink_failed",
-                Message = "unable to unlink (maybe link doesn't exist)"
+                Message = "unable to unlink (maybe link doesn't exist)",
+                StatusCode = HttpStatusCode.BadRequest
             };
         }
 
@@ -74,8 +83,10 @@ namespace project_managment.Exceptions
             return new ProjectException
             {
                 Code = "link_failed",
-                Message = "unable to link (maybe link already exists)"
+                Message = "unable to link (maybe link already exists)",
+                StatusCode = HttpStatusCode.BadRequest
             };
         }
+        private ProjectException() {}
     }
 }

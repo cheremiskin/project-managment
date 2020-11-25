@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace project_managment.Exceptions
 {
@@ -9,7 +11,8 @@ namespace project_managment.Exceptions
             return new TaskException
             {
                 Code = "task_not_found",
-                Message = "task doesn't exist"
+                Message = "task doesn't exist",
+                StatusCode = HttpStatusCode.NotFound
             };
         }
 
@@ -18,7 +21,8 @@ namespace project_managment.Exceptions
             return new TaskException
             {
                 Code = "task_access_denied",
-                Message = "you can't access this task"
+                Message = "you can't access this task",
+                StatusCode = HttpStatusCode.Unauthorized                
             };
         }
 
@@ -27,7 +31,8 @@ namespace project_managment.Exceptions
             return new TaskException
             {
                 Code = "task_save_failed",
-                Message = "unable to save the task"
+                Message = "unable to save the task",
+                StatusCode = HttpStatusCode.BadRequest
             };
         }
 
@@ -36,8 +41,13 @@ namespace project_managment.Exceptions
             return new TaskException
             {
                 Code = "task_user_link_failed",
-                Message = "unable to link user and task"
+                Message = "unable to link user and task",
+                StatusCode = HttpStatusCode.BadRequest
             };
+        }
+
+        private TaskException()
+        {
         }
     }
 }

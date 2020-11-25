@@ -69,7 +69,7 @@ namespace project_managment.Data.Repositories.RepositoryImpl
                     await connection.ExecuteScalarAsync<long>(sql, entity)
                 );
             }
-            catch (Exception ex)
+            catch (Exception ignored)
             {
                 return 0;
             }
