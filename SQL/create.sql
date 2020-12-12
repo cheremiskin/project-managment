@@ -129,28 +129,29 @@ ON DELETE CASCADE;
 ALTER TABLE project_user ADD CONSTRAINT project_user_unique
 UNIQUE(project_id, user_id);
 
-CREATE TABLE log(
+CREATE TABLE logs(
     id BIGINT PRIMARY KEY DEFAULT nextval('log_id_seq'),
-    date_created TIMESTAMP NOT NULL,
-    thread VARCHAR(255),
-    level VARCHAR(50),
-    logger VARCHAR(255),
-    message VARCHAR(4096),
-    exception VARCHAR(2048)
+    application varchar(100) NULL,
+    logged TEXT, 
+    level varchar(100) NULL,
+    message varchar(8000) NULl,
+    logger varchar(8000) NULL,
+    callsite varchar(8000) NULL,
+    exception varchar(8000) NULL
 );
-
-INSERT INTO users(email, birth_date, info, full_name, password, role_id) VALUES 
-('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf', 1),
-('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 'p03i12kjfdsf', 2),
-('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 'p03i12kjfdsf', 2),
-('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 'p03i12kjfdsf', 2),
-('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 'p03i12kjfdsf', 2);
-
-
-INSERT INTO projects(name, description, is_private, created_at, creator_id) VALUES
-('chat', 'it is chat', FALSE, DEFAULT, 1),
-('pm', 'it is somethign', FALSE, DEFAULT, 1),
-('music player', 'it is not chat', FALSE, DEFAULT, 1),
-('todo list', 'you can craete tasks', FALSE, DEFAULT, 4),
-('something', 'it is not something', FALSE, DEFAULT, 2),
-('i will regret it', 'yes', FALSE, DEFAULT, 3);
+-- 
+-- INSERT INTO users(email, birth_date, info, full_name, password, role_id) VALUES 
+-- ('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf', 1),
+-- ('2@gmail.com', now() - interval '15 years', 'second info', 'First Second Third', 'p03i12kjfdsf', 2),
+-- ('3@yandex.ru', now() - interval '14 years', 'third info', 'First Second Third', 'p03i12kjfdsf', 2),
+-- ('4@mail.ru', now() - interval '58 years', 'fourth info', 'First Second Third', 'p03i12kjfdsf', 2),
+-- ('5@yahoo.com', now() - interval '24 years', 'fifth info', 'First Second Third', 'p03i12kjfdsf', 2);
+-- 
+-- 
+-- INSERT INTO projects(name, description, is_private, created_at, creator_id) VALUES
+-- ('chat', 'it is chat', FALSE, DEFAULT, 1),
+-- ('pm', 'it is somethign', FALSE, DEFAULT, 1),
+-- ('music player', 'it is not chat', FALSE, DEFAULT, 1),
+-- ('tdo list', 'you can craete tasks', FALSE, DEFAULT, 4),
+-- ('something', 'it is not something', FALSE, DEFAULT, 2),
+-- ('i will regret it', 'yes', FALSE, DEFAULT, 3);

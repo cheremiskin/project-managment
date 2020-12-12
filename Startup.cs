@@ -1,8 +1,4 @@
-using System;
 using System.Security.Claims;
-using System.Security.Cryptography.Xml;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using project_managment.Data.Repositories;
 using project_managment.Data.Repositories.RepositoryImpl;
+using project_managment.Logging;
 using AuthenticationOptions = project_managment.Authentication.AuthenticationOptions;
 
 namespace project_managment
@@ -28,6 +25,9 @@ namespace project_managment
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // var logger = NLog.Web.NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            // logger.Info("Test");
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -70,6 +70,7 @@ namespace project_managment
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRequestLog();
             
             if (env.IsDevelopment())
             {
@@ -105,7 +106,7 @@ namespace project_managment
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
-            
+
         }
     }
 }
