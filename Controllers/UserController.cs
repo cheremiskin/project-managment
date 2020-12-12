@@ -94,5 +94,27 @@ namespace project_managment.Controllers
 
             return NoContent();
         }
+
+        [HttpGet]
+        [Route("{id}/created-projects")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProjectsCreatedBy([FromRoute(Name="id")] long id)
+        {
+            // if id belongs to caller show all projects (with private)
+            // if id doesn't belong to caller show public projects
+
+            var createdProjects = await _projectRepository.FindProjectsCreatedBy(id, id == GetClientId());
+
+            return Ok(createdProjects);
+        }
+
+        [HttpGet]
+        [Route("{id}/enrolled-projects")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetEnrolledProjects([FromRoute(Name = "id")] long id)
+        {
+            var enrolledProjects = await _projectRepository.FindProjectsUserEnrolledIn(id, id == GetClientId());
+            return Ok(enrolledProjects);
+        }
     }
 }

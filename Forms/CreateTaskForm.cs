@@ -9,6 +9,7 @@ namespace project_managment.Forms
     public class CreateTaskForm
     {
         [JsonPropertyName("title")]
+        [StringLength(128, MinimumLength = 1)]
         [Required]
         public string Title { get; set; }
         [JsonPropertyName("statusId")]

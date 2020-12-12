@@ -12,6 +12,7 @@ namespace project_managment.Forms
     {
         [Required]
         [JsonPropertyName("name")]
+        [StringLength(255, MinimumLength = 1)]
         public string Name { get; set; }
 
         [JsonPropertyName("description")]

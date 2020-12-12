@@ -23,8 +23,10 @@ namespace project_managment.Forms
         public string PasswordConfirm { get; set; }
         [JsonPropertyName("info")]
         public string Info { get; set; }
-        [StringLength(128)]
+        
         [Required]
+        [StringLength(128)]
+        [RegularExpression("^[A-Z][a-zA-Z]{3,}(?: [A-Z][a-zA-Z]*){0,2}$")]
         [JsonPropertyName("fullName")]
         public string FullName { get; set; }
         [JsonPropertyName("birthDate")]

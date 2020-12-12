@@ -14,5 +14,8 @@ namespace project_managment.Data.Repositories
         Task<ProjectUser> LinkUserAndProjectById(long userId, long projectId);
         Task<bool> UnlinkUserAndProjectById(long userId, long projectId);
         Task<Project> FindProjectByTaskId(long taskId);
+
+        Task<IEnumerable<Project>> FindProjectsCreatedBy(long userId, bool includePrivate = false);
+        Task<IEnumerable<Project>> FindProjectsUserEnrolledIn(long userId, bool includePrivate = false);
     }
 }

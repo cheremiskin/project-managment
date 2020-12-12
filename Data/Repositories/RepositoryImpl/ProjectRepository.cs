@@ -176,5 +176,21 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection(async connection =>
                 await connection.QueryFirstOrDefaultAsync<Project>(sql, new {taskId}));
         }
+
+        public async Task<IEnumerable<Project>> FindProjectsCreatedBy(long userId, bool includePrivate = false)
+        {
+            var sql = $@"SELECT {ProjectMappingString} FROM {TableName} WHERE {(includePrivate ? "": "is_private = false and ")} creator_id = :userId";
+            return await WithConnection(async (connection) => 
+                await connection.QueryAsync<Project>(sql, new {userId =  userId}) );
+        }
+
+        public async Task<IEnumerable<Project>> FindProjectsUserEnrolledIn(long userId, bool includePrivate = false)
+        {
+            var sql =
+                $@"SELECT {ProjectMappingString} FROM {TableName} WHERE {(!includePrivate ? "is_private = false and " : "")} id in " + 
+                $@"(SELECT project_id FROM project_user WHERE user_id = :userId)";
+            return await WithConnection(async (connection) => 
+                await connection.QueryAsync<Project>(sql, new {userId =  userId}) );
+        }
     }
 }

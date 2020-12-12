@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using DevOne.Security.Cryptography.BCrypt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
@@ -55,7 +56,7 @@ namespace project_managment.Controllers
         private async Task<ClaimsIdentity> GetIdentity(string email, string password)
         {
             User user = await _userRepository.FindUserByEmail(email);
-            if (user != null) //  && BCryptHelper.CheckPassword(password, user.Password)
+            if (user != null && BCryptHelper.CheckPassword(password, user.Password)) //  && BCryptHelper.CheckPassword(password, user.Password)
             {
                 var claims = new List<Claim> {new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email)};
 
