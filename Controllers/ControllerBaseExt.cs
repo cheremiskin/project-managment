@@ -70,7 +70,8 @@ namespace project_managment.Controllers
             if (members.FirstOrDefault(m => m.Id == userId) != null)
                 return AccessLevel.Member;
 
-            return !project.IsPrivate ? AccessLevel.Anonymous : AccessLevel.None;
+            return (!project.IsPrivate?.Equals(true) ?? true )  ? AccessLevel.Anonymous : AccessLevel.None;
+            
         }
 
         protected async Task<AccessLevel> GetAccessLevelForTask(long taskId)

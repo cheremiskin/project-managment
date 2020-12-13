@@ -93,9 +93,6 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             return await WithConnection<long>(async (connection) =>
                 await connection.ExecuteScalarAsync<long>(sql, entity)
             );
-            
-            
-            
         }
 
         public async System.Threading.Tasks.Task Update(Project entity)
@@ -126,9 +123,7 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             if (tableColumns.Count == 0)
                 return;
 
-            string test = String.Join(", ", tableColumns);
-
-            var sql= $@"UPDATE {TableName} SET ({String.Join(", ", tableColumns)}) = ({String.Join(",", objectFields)}) WHERE id = @Id";
+            var sql= $@"UPDATE {TableName} SET ({String.Join(", ", tableColumns)}) = (select {String.Join(",", objectFields)}) WHERE id = @Id";
 
             await WithConnection(async (connection) =>
             {
@@ -166,6 +161,14 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             var sql = $@"DELETE FROM project_user WHERE project_id = @projectId AND user_id = @userId RETURNING project_id > 0";
             return await WithConnection<bool>(async (connection) =>
                 await connection.ExecuteScalarAsync<bool>(sql, new {userId = userId, projectId = projectId}) 
+            );
+        }
+
+        public async Task<ProjectUser> FindLink(long userId, long projectId)
+        {
+            var sql = $@"SELECT user_id AS UserId, project_id AS ProjectId from project_user WHERE user_id = @userId and project_id = @projectId";
+            return await WithConnection(async connection => 
+                await connection.QueryFirstOrDefaultAsync<ProjectUser>(sql, new {userId = userId, projectId = projectId})
             );
         }
 

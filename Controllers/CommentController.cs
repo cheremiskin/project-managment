@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
+using pm.Models.UpdateModels;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
 using project_managment.Filters;
@@ -14,6 +16,7 @@ namespace project_managment.Controllers
     [ApiController]
     [Route("api/comments")]
     [Authorize(Policy = "IsUserOrAdmin")]
+    [ExceptionFilter]
     public class CommentController : ControllerBaseExt
     {
         private readonly ICommentRepository _commentRepository ;
@@ -31,7 +34,6 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [ExceptionFilter]
         public async Task<IActionResult> GetComments([Required, FromQuery(Name = "taskId")] long taskId)
         {
             var accessLevel = await GetAccessLevelForTask(taskId);
@@ -46,6 +48,21 @@ namespace project_managment.Controllers
             }
             
             return StatusCode((int) HttpStatusCode.InternalServerError);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetComment(long id)
+        {
+            var accessLevel = await GetAccessLevelForComment(id);
+            switch (accessLevel)
+            {
+                case AccessLevel.None:
+                    throw CommentException.AccessDenied();
+                default:
+                    return Ok(Cache.Comment ?? await _commentRepository.FindById(id));
+            }
         }
         
 
@@ -86,6 +103,22 @@ namespace project_managment.Controllers
             }
             
             return StatusCode((int) HttpStatusCode.InternalServerError);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> PutComment([FromRoute(Name = "id")] long id,
+            [FromBody] CommentUpdate update)
+        {
+            var accessLevel = await GetAccessLevelForComment(id);
+            switch (accessLevel)
+            {
+                case AccessLevel.Admin: case AccessLevel.Creator:
+                    await _commentRepository.Update(update.ToComment(id));
+                    return Ok();
+                default:
+                    throw CommentException.AccessDenied();
+            }
         }
         
     }

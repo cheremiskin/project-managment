@@ -13,6 +13,7 @@ namespace project_managment.Data.Repositories
         Task<ProjectUser> LinkUserAndProject(User user, Project project);
         Task<ProjectUser> LinkUserAndProjectById(long userId, long projectId);
         Task<bool> UnlinkUserAndProjectById(long userId, long projectId);
+        Task<ProjectUser> FindLink(long userId, long projectId);
         Task<Project> FindProjectByTaskId(long taskId);
 
         Task<IEnumerable<Project>> FindProjectsCreatedBy(long userId, bool includePrivate = false);

@@ -9,11 +9,11 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class CommentRepository : BaseRepository, ICommentRepository
     {
-        private const string CommentMappingString = "id as Id, content as Content, user_id as UserId, task_id as TaskId, creation_date as CreationDate";
-        private const string TableFieldsString = "id, content, user_id, task_id, creation_date";
-        private const string ObjectFieldsString = "@Id, @Content, @UserId, @TaskId, @CreationDate";
-        private const string TableFieldsWithoutIdString = "content, user_id, task_id, creation_date";
-        private const string ObjectFieldsWithoutIdString = "@Content, @UserId, @TaskId, @CreationDate";
+        private const string CommentMappingString = "id as Id, content as Content, user_id as UserId, task_id as TaskId, creation_date as CreationDate, edited as Edited";
+        private const string TableFieldsString = "id, content, user_id, task_id, creation_date, edited";
+        private const string ObjectFieldsString = "@Id, @Content, @UserId, @TaskId, @CreationDate, @Edited";
+        private const string TableFieldsWithoutIdString = "content, user_id, task_id, creation_date, edited";
+        private const string ObjectFieldsWithoutIdString = "@Content, @UserId, @TaskId, @CreationDate, @Edited";
         private const string TableName = "comments";
         public CommentRepository(IConfiguration configuration) : base(configuration)
         {
@@ -74,7 +74,19 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 
         public async System.Threading.Tasks.Task Update(Comment entity)
         {
-            string sql = $@"UPDATE {TableName} SET ({TableFieldsWithoutIdString}) = ({ObjectFieldsWithoutIdString}) WHERE id = @Id";
+            var tableColumns = new List<string>();
+            var objectFields = new List<string>();
+
+            if (entity.Content != null)
+            {
+                tableColumns.Add("content");
+                objectFields.Add("@Content");
+            }
+
+            if (tableColumns.Count == 0)
+                return;
+            
+            var sql= $@"UPDATE {TableName} SET ({string.Join(", ", tableColumns)}, edited) = (select {string.Join(",", objectFields)}, true) WHERE id = @Id";
 
             await WithConnection(async (connection) =>
             {

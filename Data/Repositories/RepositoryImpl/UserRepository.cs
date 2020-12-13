@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Http;
@@ -96,17 +97,34 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 
         public async System.Threading.Tasks.Task Update(User entity)
         {
-            string sql = $@"UPDATE users SET email = @email, @full_name = @full_name, password = @password, info = @info " +
-                           "WHERE id = @id";
-            await WithConnection(async (connection) =>
+            var tableColumns = new List<string>();
+            var objectFields = new List<string>();
+
+            if (entity.Info != null)
             {
-                await connection.ExecuteAsync(sql, new { email = entity.Email, 
-                                                         full_name = entity.FullName, 
-                                                         password = entity.Password,
-                                                         info = entity.Info,
-                                                         id = entity.Id,
-                });
-            });
+                tableColumns.Add("info");
+                objectFields.Add("@Info");
+            }
+
+            if (entity.BirthDate != null)
+            {
+                tableColumns.Add("info");
+                objectFields.Add("@Info");
+            }
+
+            if (entity.FullName != null)
+            {
+                tableColumns.Add("full_name");
+                objectFields.Add("@FullName");
+            }
+            
+            if (tableColumns.Count == 0)
+                return;
+
+            var sql = $@"UPDATE {TableName} SET ({string.Join(", ", tableColumns)}) " + 
+                                                  $@"= (select {string.Join(", ", objectFields)}) where id = @Id";
+            
+            await WithConnection(async (connection) => await connection.ExecuteAsync(sql, entity));
         }
     }
 }

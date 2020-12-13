@@ -19,18 +19,14 @@ namespace project_managment.Forms
         public string Description { get; set; }
         
         [JsonPropertyName("isPrivate")]
-        public bool IsPrivate { get; set; } = false;
+        public bool? IsPrivate { get; set; } = false;
     
         public Project ToProject()
         {
-            Project project = new Project();
-
-            project.Name = Name;
-            project.Description = Description;
-            project.CreatedAt = DateTime.Now;
-            project.IsPrivate = IsPrivate;
-
-            return project;
+            return  new Project
+            {
+                Name = Name, Description = Description, CreatedAt = DateTime.Now, IsPrivate = IsPrivate ?? false
+            };
         }
     }
 }

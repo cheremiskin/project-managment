@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
-using project_managment.Data.Dto;
+using pm.Models.UpdateModels;
+using project_managment.Data.Models.Dto;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
 using project_managment.Filters;
@@ -80,6 +81,22 @@ namespace project_managment.Controllers
 
             user = await _userRepository.FindById(id);
             return Created("", new UserDto(user));
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult PutUser([FromRoute(Name = "id")] long id,[FromBody] UserUpdate user)
+        {
+            var role = GetClientRoleClaim()?.Value;
+            var clientId = GetClientId();
+
+            if (!(role == Role.RoleAdmin || clientId == id))
+            {
+                throw UserException.AccessDenied();
+            }
+
+            _userRepository.Update(user.ToUser(id));
+            return Ok();
         }
 
         [HttpDelete]

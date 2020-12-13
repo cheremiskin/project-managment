@@ -43,6 +43,15 @@ namespace project_managment.Exceptions
             };
         }
 
+        public static UserException AccessDenied()
+        {
+            return new UserException
+            {
+                Code = "access_denied",
+                Message = "you can't access this data",
+                StatusCode = HttpStatusCode.Unauthorized
+            };
+        }
         private UserException (){}
     }
 }

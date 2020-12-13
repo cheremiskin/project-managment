@@ -11,7 +11,7 @@ namespace pm.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public long CreatorId { get; set; }
-        public Boolean IsPrivate { get; set; }
+        public bool? IsPrivate { get; set; }
         public DateTime CreatedAt { get; set; }
 
         /*----------------------------------------*/

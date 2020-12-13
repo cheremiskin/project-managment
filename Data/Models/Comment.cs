@@ -12,5 +12,6 @@ namespace pm.Models
         public long UserId { get; set; }
         public long TaskId { get; set; }
         public DateTime CreationDate { get; set; }
+        public bool Edited { get; set; }
     }
 }

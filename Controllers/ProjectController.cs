@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pm.Models;
-using project_managment.Data.Dto;
+using pm.Models.UpdateModels;
+using project_managment.Data.Models.Dto;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
 using project_managment.Filters;
@@ -94,16 +95,15 @@ namespace project_managment.Controllers
             return Created($"/api/projects/{id}", project); // should return id
         }
         
-        [HttpPatch]
+        [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> UpdateProject(long id, Project project)
+        public async Task<IActionResult> UpdateProject(long id, [FromBody]ProjectUpdate project)
         {
             var accessLevel = await GetAccessLevelForProject(id);
             switch (accessLevel)
             {
                 case AccessLevel.Admin: case AccessLevel.Creator:
-                    project.Id = id;
-                    await _projectRepository.Update(project);
+                    await _projectRepository.Update(project.ToProject(id));
                     return NoContent();
                 default:
                     throw ProjectException.UpdateDenied();

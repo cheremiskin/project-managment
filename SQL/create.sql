@@ -67,9 +67,9 @@ CREATE TABLE tasks(
     title VARCHAR(128) NOT NULL,
     content TEXT,
     creation_date TIMESTAMP DEFAULT NOW(),
-    expiration_date TIMESTAMP,
+    expiration_date TIMESTAMP DEFAULT NULL,
     status_id INT NULL,
-    execution_time TIMESTAMP,
+    execution_time TIMESTAMP DEFAULT NULL,
     project_id BIGINT NOT NULL
 );
 
@@ -86,7 +86,8 @@ CREATE TABLE comments(
     content VARCHAR(512) NOT NULL,
     creation_date TIMESTAMP DEFAULT NOW(),
     user_id BIGINT,
-    task_id BIGINT NOT NULL
+    task_id BIGINT NOT NULL,
+    edited BOOLEAN DEFAULT FALSE 
 );
 
 ALTER TABLE comments ADD CONSTRAINT comments_user_id_fk

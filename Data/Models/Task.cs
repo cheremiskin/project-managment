@@ -13,8 +13,8 @@ namespace pm.Models
         public string Content { get; set; }
         public long ProjectId { get; set; }
         public DateTime CreationDate { get; set; }
-        public DateTime ExpirationDate { get; set; }
-        public DateTime ExecutionTime { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public DateTime? ExecutionTime { get; set; }
 
     }
 }

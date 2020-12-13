@@ -18,9 +18,6 @@ namespace project_managment.Forms
         [Required]
         [JsonPropertyName("password")]
         public string Password { get; set; }
-        [Required]
-        [JsonPropertyName("passwordConfirm")] 
-        public string PasswordConfirm { get; set; }
         [JsonPropertyName("info")]
         public string Info { get; set; }
         

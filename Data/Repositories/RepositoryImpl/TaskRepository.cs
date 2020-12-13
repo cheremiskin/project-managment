@@ -77,7 +77,37 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 
         public async System.Threading.Tasks.Task Update(Task entity)
         {
-            string sql = $@"UPDATE {TableName} SET ({TableFieldsWithoutIdString}) = ({ObjectFieldsWithoutIdString}) WHERE id = @Id";
+            var tableColumns = new List<string>();
+            var objectFields = new List<string>();
+
+            if (entity.Content != null)
+            {
+                tableColumns.Add("content");
+                objectFields.Add("@Content");
+            }
+
+            if (entity.Title != null)
+            {
+                tableColumns.Add("title");
+                objectFields.Add("@Title");
+            }
+
+            if (entity.ExecutionTime != null)
+            {
+                tableColumns.Add("execution_time");
+                objectFields.Add("@ExecutionTime");
+            }
+
+            if (entity.ExpirationDate != null)
+            {
+                tableColumns.Add("expiration_date");
+                objectFields.Add("@ExpirationDate");
+            }
+            
+            if (tableColumns.Count == 0)
+                return;
+            var sql = $@"UPDATE {TableName} SET ({string.Join(", ", tableColumns)}) " + 
+                                                  $@"= (select {string.Join(", ", objectFields)}) where id = @Id";
 
             await WithConnection(async (connection) =>
             {

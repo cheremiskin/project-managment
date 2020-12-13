@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
 using pm.Models.Links;
-using project_managment.Data.Dto;
+using pm.Models.UpdateModels;
+using project_managment.Data.Models.Dto;
 using project_managment.Data.Repositories;
 using project_managment.Exceptions;
 using project_managment.Filters;
@@ -77,7 +78,7 @@ namespace project_managment.Controllers
                     var id = await _taskRepository.Save(task);
                     if (id == 0)
                         throw TaskException.PostFailed();
-                    return Created($"/api/tasks/{id}", id);
+                    return Created($"/api/tasks/{id}", await _taskRepository.FindById(id));
                 default:
                     throw ProjectException.AccessDenied();
             }
@@ -98,6 +99,22 @@ namespace project_managment.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> PutTask(long id, [FromBody] TaskUpdate task)
+        {
+            var accessLevel = await GetAccessLevelForTask(id);
+            switch (accessLevel)
+            {
+                case AccessLevel.Creator: case AccessLevel.Admin:
+                    await _taskRepository.Update(task.ToTask(id));
+                    return Ok();
+                default:
+                    throw TaskException.AccessDenied();
+            }
+        }
+        
+        
         [HttpGet]
         [Route("{id}/users")]
         public async Task<IActionResult> GetTaskUsers(long id)
@@ -123,6 +140,11 @@ namespace project_managment.Controllers
             switch (accessLevel)
             {
                 case AccessLevel.Creator: case AccessLevel.Admin:
+                    var userProjectLink = await _projectRepository.FindLink(userId, Cache.Project.Id);
+
+                    if (userProjectLink == null)
+                        throw ProjectException.AccessDenied();
+                    
                     var link = await _taskRepository.LinkUserAndTask(userId, taskId);
                     if (link == null)
                         throw TaskException.LinkFailed();
