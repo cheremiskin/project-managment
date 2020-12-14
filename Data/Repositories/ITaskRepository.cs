@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using pm.Models;
 using pm.Models.Links;
 using Task = pm.Models.Task;
 
@@ -12,5 +14,6 @@ namespace project_managment.Data.Repositories
         Task<bool> UnlinkUserAndTask(long userId, long taskId);
         Task<bool> UnlinkAllUsersFromTask(long taskId);
 
+        Task<IEnumerable<Status>> FindAllStatuses();
     }
 }

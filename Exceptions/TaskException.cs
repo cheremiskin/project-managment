@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -45,9 +46,20 @@ namespace project_managment.Exceptions
                 StatusCode = HttpStatusCode.BadRequest
             };
         }
+        
+        public static TaskException UpdateFail()
+        {
+            return new TaskException
+            {
+                Code = "task_update_failed",
+                Message = "unable to update the task",
+                StatusCode =  HttpStatusCode.BadRequest
+            };
+        }
 
         private TaskException()
         {
         }
+
     }
 }

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using pm.Models;
 using pm.Models.Links;
 using Task = pm.Models.Task;
 
@@ -149,6 +151,12 @@ namespace project_managment.Data.Repositories.RepositoryImpl
             var sql = $@"WITH deleted AS (DELETE FROM task_user WHERE task_id = @taskId RETURNING *) SELECT COUNT(*) > 0 FROM deleted";
             return await WithConnection<bool>(async (connection) =>
                 await connection.ExecuteScalarAsync<bool>(sql, new {taskId = taskId}));
+        }
+
+        public async Task<IEnumerable<Status>> FindAllStatuses()
+        {
+            var sql = $"select id as Id, name as Name from statuses";
+            return await WithConnection(async connection => await connection.QueryAsync<Status>(sql));
         }
     }
 }

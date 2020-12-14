@@ -30,8 +30,6 @@ namespace project_managment.Logging
                     context.Request?.Method,
                     context.Request?.Path.Value,
                     context.Response?.StatusCode);
-                _log.LogDebug("debug test");
-                _log.LogTrace("trace test");
             }
         }
     }

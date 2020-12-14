@@ -13,14 +13,12 @@ DROP SEQUENCE IF EXISTS comments_id_seq;
 DROP SEQUENCE IF EXISTS tasks_id_seq;
 DROP SEQUENCE IF EXISTS projects_id_seq;
 DROP SEQUENCE IF EXISTS log_id_seq;
-DROP SEQUENCE IF EXISTS statuses_id_seq;
 
 CREATE SEQUENCE users_id_seq START WITH 1;
 CREATE SEQUENCE comments_id_seq START WITH 1;
 CREATE SEQUENCE tasks_id_seq START WITH 1;
 CREATE SEQUENCE projects_id_seq START WITH 1;
 CREATE SEQUENCE log_id_seq START WITH 1;
-CREATE SEQUENCE statuses_id_seq START WITH 1;
 
 
 
@@ -58,7 +56,7 @@ FOREIGN KEY(creator_id) REFERENCES users(id)
 ON DELETE SET DEFAULT;
 
 CREATE TABLE statuses(
-    id INT PRIMARY KEY DEFAULT nextval('statuses_id_seq'),
+    id INT PRIMARY KEY,
     name VARCHAR(64)
 );
 
@@ -140,6 +138,9 @@ CREATE TABLE logs(
     callsite varchar(8000) NULL,
     exception varchar(8000) NULL
 );
+
+insert into statuses(id, name) values (1, 'done'), (2, 'in process'), (3, 'deferred');
+
 -- 
 -- INSERT INTO users(email, birth_date, info, full_name, password, role_id) VALUES 
 -- ('1@mail.ru', now() - interval '20 years', 'first info', 'First Second Third', 'p03i12kjfdsf', 1),

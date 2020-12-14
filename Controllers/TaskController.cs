@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
 using pm.Models.Links;
@@ -107,7 +108,14 @@ namespace project_managment.Controllers
             switch (accessLevel)
             {
                 case AccessLevel.Creator: case AccessLevel.Admin:
-                    await _taskRepository.Update(task.ToTask(id));
+                    try
+                    {
+                        await _taskRepository.Update(task.ToTask(id));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw TaskException.UpdateFail();
+                    }
                     return Ok();
                 default:
                     throw TaskException.AccessDenied();
@@ -170,5 +178,14 @@ namespace project_managment.Controllers
                     throw ProjectException.AccessDenied();
             }
         }
+
+        [HttpGet]
+        [Route("statuses")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStatuses()
+        {
+            return Ok(await _taskRepository.FindAllStatuses());
+        }
+
     }
 }
