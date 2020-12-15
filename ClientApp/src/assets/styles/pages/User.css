@@ -1,0 +1,31 @@
+.user-info-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.info {
+    padding-left: 1rem;
+}
+
+.info > span {
+    color: #cfcfcf;
+    font-size: 1rem;
+}
+
+.user-control{
+    min-width: 5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-avatar {
+    max-width: 5rem;
+    min-width: 5rem;
+}
+
+.edit-profile-button {
+    margin-top: 0.5rem;
+    width: 5rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
