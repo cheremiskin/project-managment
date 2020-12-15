@@ -1,0 +1,9 @@
+.user-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.username {
+    padding-left: 0.5rem;
+}

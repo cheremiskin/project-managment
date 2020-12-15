@@ -21,5 +21,12 @@ export const router = {
     },
     comment: {
         list: (params = {}) => addParams(`/api/comments`, params),
+    },
+    user: {
+        me : () => `/api/users/me`,
+        one: (id) => `/api/users/${id}`,
+        createdProjects: (id) => `/api/users/${id}/created-projects`,
+        enrolledProjects: (id) => `/api/users/${id}/enrolled-projects`
+
     }
 }
