@@ -1,3 +1,9 @@
+.user-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .user-info-wrapper {
     display: flex;
     flex-direction: row;
@@ -19,13 +25,14 @@
 }
 
 .user-avatar {
-    max-width: 5rem;
-    min-width: 5rem;
+    /* max-width: 5rem;
+    min-width: 5rem; */
+    width: 100%;
 }
 
 .edit-profile-button {
     margin-top: 0.5rem;
-    width: 5rem;
+    width: 100%;
     font-size: 1rem;
     font-weight: bold;
 }

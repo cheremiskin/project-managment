@@ -126,6 +126,13 @@ namespace project_managment.Controllers
         }
 
         [HttpGet]
+        [Route("my-projects")]
+        public async Task<IActionResult> GetMyProjects()
+        {
+            return Ok(await _projectRepository.FindProjectsCreatedBy(GetClientId(), includePrivate: true));
+        }
+
+        [HttpGet]
         [Route("{id}/enrolled-projects")]
         [AllowAnonymous]
         public async Task<IActionResult> GetEnrolledProjects([FromRoute(Name = "id")] long id)

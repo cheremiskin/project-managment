@@ -12,7 +12,8 @@ export const router = {
     project: {
         list: (params = {}) => addParams(`/api/projects`, params),
         one: (id) => `api/projects/${id}`,
-        users: (id) => `/api/projects/${id}/users`
+        users: (id) => `/api/projects/${id}/users`,
+        addUser: (projectId, userId) => addParams(`/api/projects/${projectId}/users?`, {userId: userId})
     },
     task: {
         list: (params = {}) => addParams(`/api/tasks?`, params),
@@ -26,7 +27,7 @@ export const router = {
         me : () => `/api/users/me`,
         one: (id) => `/api/users/${id}`,
         createdProjects: (id) => `/api/users/${id}/created-projects`,
-        enrolledProjects: (id) => `/api/users/${id}/enrolled-projects`
-
+        enrolledProjects: (id) => `/api/users/${id}/enrolled-projects`,
+        myProjects: () => `/api/users/my-projects`
     }
 }
