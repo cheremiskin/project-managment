@@ -26,7 +26,8 @@ namespace project_managment.Logging
             }
             finally
             {
-                _log.LogInformation("Request {method} {url} => {statusCode}",
+                if (context.Request != null && context.Request.Path.Value.StartsWith("/api"))
+                    _log.LogInformation("Request {method} {url} => {statusCode}",
                     context.Request?.Method,
                     context.Request?.Path.Value,
                     context.Response?.StatusCode);
