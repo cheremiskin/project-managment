@@ -106,20 +106,18 @@ export const User = (props) => {
     const [editModalVisible, setEditModalVisible] = useState(false)
     const [addModalVisible, setAddModalVisible] = useState(false)
 
-    const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibWFydGluQG1haWwucnUiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJST0xFX1VTRVIiLCJVc2VySWQiOiIyIiwibmJmIjoxNjA3NzY1Mzk5LCJleHAiOjE2NjE3NjUzOTksImlzcyI6IlBtQ29ycCIsImF1ZCI6IlBtIn0.yU4oJtAbwchmWlPGHsKgaayDZ2DpBSscyskAqBGcvB4'
+    const token = localStorage.getItem('token');
 
     useEffect(() => { 
         HttpProvider.auth(router.user.createdProjects(props.match.params.id), token).then((response) => {
-            setCreatedProjects(response.map((u) => <li key = {u.id}>{u.name}</li>))
-            // setCreatedProjects(response)
+            setCreatedProjects(response)
             setCreatedProjectsLoading(false)
         })
     }, [])
 
     useEffect(() => {
         HttpProvider.auth(router.user.enrolledProjects(props.match.params.id), token).then((response) => {
-            setEnrolledProjects(response.map((u) => <li key = {u.id}>{u.name}</li>))
-            // setEnrolledProjects(response)
+            setEnrolledProjects(response)
             setEnrolledProjectsLoading(false)
         })
     }, [])
@@ -147,15 +145,20 @@ export const User = (props) => {
 
 
     const onSubmitHandle = (payload) => {
-        HttpProvider.auth_put(router.user.one(userMe.id), JSON.stringify(payload), token)
+        payload.birthDate = payload.birthDate.toISOString().split('T')[0] 
+        HttpProvider.auth_put(router.user.one(userMe.id), payload, token)
     }
 
     const assignUserToProjects = (links) =>{ 
-      for (var id in links){
+      for (let id in links){
         if (links[id]){
-          HttpProvider.auth_post(router.project.addUser(id, user.id))
+            HttpProvider.auth_post(router.project.addUser(id, user.id), {}, token)
         }
       }
+    }
+   
+    const excludeProjects = (projectListTarget, projectList) => {
+        return projectListTarget.filter(project => !projectList.some(p => project.id === p.id))  
     }
     
     return (
@@ -166,7 +169,7 @@ export const User = (props) => {
                 <div className = 'user-info-wrapper'>
                     <div className='user-control'>
                         <Avatar size = {82} className = 'user-avatar' src = 'https://picsum.photos/200/200?blur'>{user.fullName[0]}</Avatar> 
-                        {userMe.id == user.id && 
+                        {userMe.id === user.id && 
                             <> 
                                 <Button className = 'edit-profile-button' onClick = {() => setEditModalVisible(true)}> Edit </Button>
                                 <UpdateProfileForm 
@@ -191,7 +194,7 @@ export const User = (props) => {
                     visible = {addModalVisible}
                     onCreate = {assignUserToProjects}
                     onCancel = {() => setAddModalVisible(false)}
-                    projects = {myProjects}
+                    projects = {excludeProjects(myProjects, enrolledProjects)}
                    />
                 </div>
                 }
@@ -200,11 +203,19 @@ export const User = (props) => {
 
             <Tabs defaultActiveKey = "1">
                 <TabPane tab = "Created projects" key = "1">
-                    {createdProjectsLoading ? <Spin /> : <ul>{createdProjects} </ul>}
+                    {createdProjectsLoading ? <Spin /> : 
+                        <ul>
+                            {createdProjects.map(project => <li key = {project.id}>{project.name}</li>)} 
+                        </ul>
+                    }
                 </TabPane>   
 
                 <TabPane tab = "Enrolled projects" key = "2">
-                    {enrolledProjectsLoading ? <Spin /> : <ul>{enrolledProjects}</ul>}
+                    {enrolledProjectsLoading ? <Spin /> : 
+                        <ul>
+                            {enrolledProjects.map(project => <li key = {project.id}>{project.name}</li>)}
+                        </ul>
+                    }
                 </TabPane>
             </Tabs>
             </>

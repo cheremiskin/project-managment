@@ -26,6 +26,7 @@ export const router = {
     user: {
         me : () => `/api/users/me`,
         one: (id) => `/api/users/${id}`,
+        many: (page, size) => addParams(`/api/users?`, {page : page, size: size}),
         createdProjects: (id) => `/api/users/${id}/created-projects`,
         enrolledProjects: (id) => `/api/users/${id}/enrolled-projects`,
         myProjects: () => `/api/users/my-projects`

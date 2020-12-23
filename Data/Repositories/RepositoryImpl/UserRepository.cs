@@ -108,8 +108,8 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 
             if (entity.BirthDate != null)
             {
-                tableColumns.Add("info");
-                objectFields.Add("@Info");
+                tableColumns.Add("birth_date");
+                objectFields.Add("@BirthDate");
             }
 
             if (entity.FullName != null)
