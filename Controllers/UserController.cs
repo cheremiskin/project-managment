@@ -85,6 +85,7 @@ namespace project_managment.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [ValidateModel]
         public IActionResult PutUser([FromRoute(Name = "id")] long id,[FromBody] UserUpdate user)
         {
             var role = GetClientRoleClaim()?.Value;
@@ -137,7 +138,12 @@ namespace project_managment.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetEnrolledProjects([FromRoute(Name = "id")] long id)
         {
-            var enrolledProjects = await _projectRepository.FindProjectsUserEnrolledIn(id, id == GetClientId());
+            var enrolledProjects = await _projectRepository.FindProjectsUserEnrolledIn(id, true);
+            enrolledProjects.Where(project =>
+            {
+                var members = _userRepository.FindAllUsersInProject(project.Id).Result;
+                return members.FirstOrDefault(u => u.Id == GetClientId()) != null;
+            });
             return Ok(enrolledProjects);
         }
     }
