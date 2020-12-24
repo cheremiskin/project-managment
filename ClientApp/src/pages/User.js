@@ -8,7 +8,7 @@ import '../assets/styles/pages/User.css'
 
 const {TabPane} = Tabs;
 
-const UpdateProfileForm = ({ visible, onCreate, onCancel, user }) => {
+const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
   const [formUser, setUser] = useState(user)
   const [form] = Form.useForm();
   return (
@@ -23,7 +23,7 @@ const UpdateProfileForm = ({ visible, onCreate, onCancel, user }) => {
           .validateFields()
           .then((values) => {
             form.resetFields();
-            onCreate(values);
+            onUpdate(values);
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -92,6 +92,7 @@ const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
 export const User = (props) => {
     const [createdProjects, setCreatedProjects] = useState([])
     const [createdProjectsLoading, setCreatedProjectsLoading] = useState(true)
+    
     const [enrolledProjects, setEnrolledProjects] = useState([])
     const [enrolledProjectsLoading, setEnrolledProjectsLoading] = useState(true)
 
@@ -100,6 +101,7 @@ export const User = (props) => {
 
     const [user, setUser] = useState({})
     const [userMe, setUserMe] = useState({})
+    
     const [userLoading, setUserLoading] = useState(true)
     const [userMeLoading, setUserMeLoading] = useState(true)
     
@@ -144,9 +146,22 @@ export const User = (props) => {
     }, [])
 
 
-    const onSubmitHandle = (payload) => {
+    const onUpdateHandle = (payload) => {
+        setUserMeLoading(true)
+        
         payload.birthDate = payload.birthDate.toISOString().split('T')[0] 
-        HttpProvider.auth_put(router.user.one(userMe.id), payload, token)
+        HttpProvider.auth_put(router.user.one(userMe.id), payload, token).then( response => {
+            if (response.status === 200)
+                HttpProvider.auth(router.user.one(userMe.id), token).then(entity => {
+                    console.log('NEW ME', entity)
+                    setUserMe(entity)
+                    setUserMeLoading(false)
+                })
+            else 
+                setUserMeLoading(false)
+        })
+        
+        setEditModalVisible(false)
     }
 
     const assignUserToProjects = (links) =>{ 
@@ -174,7 +189,7 @@ export const User = (props) => {
                                 <Button className = 'edit-profile-button' onClick = {() => setEditModalVisible(true)}> Edit </Button>
                                 <UpdateProfileForm 
                                     visible = {editModalVisible}
-                                    onCreate = {onSubmitHandle}
+                                    onUpdate = {onUpdateHandle}
                                     onCancel = {() => setEditModalVisible(false)}
                                     user = {user}
                                     />
