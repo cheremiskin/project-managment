@@ -57,7 +57,7 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 
         public async Task<bool> RemoveById(long id)
         {
-            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id) SELECT COUNT(*) > 0 FROM deleted";
+            string sql = $@"WITH deleted AS (DELETE FROM {TableName} WHERE id = @id RETURNING *) SELECT COUNT(*) > 0 FROM deleted";
 
             return await WithConnection(async (connection) =>
                 await connection.ExecuteScalarAsync<bool>(sql, new { id })
