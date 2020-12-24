@@ -6,6 +6,7 @@ import { ProjectDetail } from './pages/ProjectDetail';
 import { Projects } from './pages/Projects';
 import { User } from './pages/User';
 import './assets/styles/App.css';
+import {UserList} from "./pages/UserList";
 
 export default class App extends Component {
   static displayName = App.name;
@@ -14,6 +15,7 @@ export default class App extends Component {
     return (
       <Layout>
         <Route exact path='/' component={Home} />
+        <Route exact path='/users' component = {UserList} />
         <Route path='/user/:id' component={User} />
         <Route path='/projects/' component={Projects} />
         <Route path='/project/:id' component={ProjectDetail} />
