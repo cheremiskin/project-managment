@@ -1,0 +1,9 @@
+﻿.task-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#user-count-holder {
+    align-content: end;
+}

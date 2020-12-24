@@ -44,32 +44,36 @@ export const TaskList = (props) => {
     
     const [createModalVisible, setCreateModalVisible] = useState(false)
     
-
+    
     const deleteTask = (taskId)  => {
         HttpProvider.auth_delete(router.task.one(taskId), token).then(
-            response => console.log(response) 
+            response => {
+                HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
+                    setTasks(res)                    
+                })
+            }
         )
     }
     
     const createTask = (values) => {
         HttpProvider.auth_post(router.task.create({projectId : props.params.projectId}), values, token)
-            .then(response => console.log(response))
+            .then(
+                response => {
+                    HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
+                        setTasks(res)
+                    })
+                })
     }
     
     useEffect(()=>{
         HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
-            setTasks(res.map((item, index) => 
-                <TaskCard 
-                    task = {item} 
-                    key={index} 
-                    userCount={1} 
-                    onDelete = {() => deleteTask(item.id)}/>))
+            setTasks(res)
         })
     }, []);
 
     return (
         <>
-            <Button 
+            <Button id = 'create-button'
                 onClick = {() => setCreateModalVisible(true)}
             >
                 Create New Task
@@ -79,10 +83,18 @@ export const TaskList = (props) => {
                 onCancel={() => setCreateModalVisible(false)}
                 onCreate = {(values) => {
                     createTask(values)
+                    setCreateModalVisible(false)
                 }}/>
 
             <div className = 'task-container'>
-                {tasks}
+                {
+                    tasks.map((item, index) => 
+                    <TaskCard
+                        task = {item}
+                        key={index}
+                        userCount={1}
+                        onDelete = {() => deleteTask(item.id)}/>
+                )}
             </div> 
         </>
     )

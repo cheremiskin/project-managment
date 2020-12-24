@@ -59,7 +59,7 @@ const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
 
 const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
   const [form] = Form.useForm()
-  const [project, setProjets] = useState(projects)
+  const [project, setProjects] = useState(projects)
   console.log(projects)
   return (
     <Modal 
@@ -74,15 +74,15 @@ const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
       onCancel = {onCancel}
       okText = 'Add'
       title = 'Add user to project'>
-        <Form 
-          form = {form}
-          name = 'add_to_projects'>
-            { 
-              projects.map((value) => 
-                <Form.Item key = {value.id} name = {value.id} valuePropName = 'checked' initialValue = {false}>
-                  <Checkbox>  {value.name} </Checkbox>
-                </Form.Item> 
-              )
+        <Form
+            form={form}
+            name='add_to_projects'>
+            {
+                projects.map((value) =>
+                    <Form.Item key={value.id} name={value.id} valuePropName='checked' initialValue={false}>
+                        <Checkbox>  {value.name} </Checkbox>
+                    </Form.Item>
+                )
             }
         </Form>
     </Modal>

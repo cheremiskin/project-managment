@@ -1,0 +1,11 @@
+﻿.task-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+
+#create-button {
+    margin-bottom: 1rem;
+}

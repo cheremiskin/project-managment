@@ -5,6 +5,7 @@ import '../../../assets/styles/components/UserView.css'
 
 export const UserView = (props) => {
     const [firstName, lastName] = props.user.fullName.split(' ')
+    const info = props.user.info
 
     return (
         <div className = 'user-wrapper'>
@@ -14,6 +15,11 @@ export const UserView = (props) => {
                 <div> {firstName} </div>
                 <div> {lastName}</div>
             </div>
+            } 
+            {props.withInfo &&
+                <div className = 'info'>
+                    {info}
+                </div>
             }
         </div>
     ) 

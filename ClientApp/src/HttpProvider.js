@@ -16,7 +16,8 @@ class HttpProvider {
     }
 
     static _send(url, method = 'POST', data = {}, headers = {}) {
-        console.log(data);
+        console.log('POST: ', data);
+        console.log('Headers', headers);
         return fetch(`${API_ROOT}${url}`, {
             method: method,
             // mode: 'cors',
@@ -34,7 +35,7 @@ class HttpProvider {
             }
 
             console.log('response: ', response)
-            return response.json();
+            return response;
         })
     }
 
@@ -55,11 +56,16 @@ class HttpProvider {
     }
 
     static auth_post(url, data, token = '') {
+        console.log('POST WITH LINK', url)
         return this._send(url, 'POST', data, {'Authorization': token});
     }
 
     static auth_put(url, data, token = ''){
         return this._send(url, 'PUT', data, {'Authorization': token})
+    }
+    
+    static auth_delete(url, token = ''){
+        return this._send(url, 'DELETE', {}, {'Authorization': token})
     }
 
 }

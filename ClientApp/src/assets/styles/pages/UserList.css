@@ -1,0 +1,12 @@
+﻿.list-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.manage {
+    display: flex;
+    flex-direction: row;
+    align-content: flex-end;
+}
+
+
