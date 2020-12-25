@@ -20,7 +20,8 @@ export const router = {
         one: (id) => `/api/tasks/${id}`,
         users: (id) => `/api/tasks/${id}/users`,
         addUser: (taskId, userId) => addParams(`/api/tasks/${taskId}/users?`, {userId}),
-        create: (params = {}) => addParams('/api/tasks?', params)
+        create: (params = {}) => addParams('/api/tasks?', params),
+        statuses: () => `/api/tasks/statuses`
     },
     comment: {
         list: (params = {}) => addParams(`/api/comments`, params),

@@ -28,12 +28,12 @@ class HttpProvider {
             },
             body : JSON.stringify(data)
         }).then((response) => {
-
+            console.log(this);
             if (!response.ok) {
                 const error = new Error(response.statusText);
                 console.error("error: ", error);
             }
-
+            
             console.log('response: ', response)
             return response;
         })

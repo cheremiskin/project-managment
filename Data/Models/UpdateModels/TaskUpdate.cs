@@ -8,7 +8,6 @@ namespace pm.Models.UpdateModels
     {
         [JsonPropertyName("title")]
         [StringLength(128, MinimumLength = 1)]
-        [Required]
         public string Title { get; set; } 
         [JsonPropertyName("content")]
         public string Content { get; set; }
@@ -16,6 +15,8 @@ namespace pm.Models.UpdateModels
         public DateTime? ExpirationDate { get; set; }
         [JsonPropertyName("executionTime")]
         public DateTime? ExecutionTime { get; set; }
+        [JsonPropertyName("statusId")]
+        public int StatusId { get; set; }
 
         public Task ToTask(long id)
         {
@@ -25,6 +26,7 @@ namespace pm.Models.UpdateModels
                 Content = this.Content,
                 ExpirationDate = this.ExpirationDate,
                 ExecutionTime = this.ExecutionTime,
+                StatusId = this.StatusId,
                 Id = id
             };
         }

@@ -46,7 +46,7 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
 const token = localStorage.getItem('token')
 
 export const TaskList = (props) => {
-
+    
     const [tasks, setTasks] = useState([]);
     const [createModalVisible, setCreateModalVisible] = useState(false)
     const [usersInProject, setUsersInProject] = useState([])
@@ -102,7 +102,6 @@ export const TaskList = (props) => {
                     <TaskCard
                         task = {item}
                         key={index}
-                        userCount={1}
                         onDelete = {() => deleteTask(item.id)}/>
                 )}
             </div> 

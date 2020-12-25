@@ -42,17 +42,24 @@ export const CreateTaskForm = ({form, users}) => {
                 /> 
             </Form.Item>
             <Form.Item label = 'Expires on'>
-                <Form.Item 
-                    label = 'Date'
-                    name = 'date'
-                >
-                    <DatePicker name = 'date' />
-                </Form.Item>
-                <Form.Item 
-                    label = 'Time'
-                    name = 'time'>
-                    <TimePicker name = 'time' />
-                </Form.Item>
+                <div style = {{
+                    display: 'flex',
+                    flexDirection: 'row'
+                }}>
+                    <Form.Item
+                        label = 'Date'
+                        name = 'date'
+                    >
+                        <DatePicker name = 'date' />
+                    </Form.Item>
+                    <Form.Item
+                        label = 'Time'
+                        name = 'time'
+                        style = {{marginLeft: '2rem'}} 
+                    >
+                        <TimePicker name = 'time' />
+                    </Form.Item>
+                </div>
             </Form.Item>
             
             <Form.Item 

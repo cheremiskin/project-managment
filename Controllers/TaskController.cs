@@ -118,7 +118,7 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForTask(id);
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin:
+                case AccessLevel.Creator: case AccessLevel.Admin: 
                     try
                     {
                         await _taskRepository.Update(task.ToTask(id));

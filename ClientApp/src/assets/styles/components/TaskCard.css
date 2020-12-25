@@ -1,9 +1,11 @@
-﻿.task-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+﻿.task-card {
+    width: 300px;
 }
 
-#user-count-holder {
-    align-content: end;
+.task-card .ant-card-action {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
+

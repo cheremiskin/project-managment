@@ -105,6 +105,12 @@ namespace project_managment.Data.Repositories.RepositoryImpl
                 tableColumns.Add("expiration_date");
                 objectFields.Add("@ExpirationDate");
             }
+
+            if (entity.StatusId != 0)
+            {
+                tableColumns.Add("status_id"); 
+                objectFields.Add("@StatusId");
+            }
             
             if (tableColumns.Count == 0)
                 return;

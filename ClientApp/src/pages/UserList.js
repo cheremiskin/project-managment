@@ -57,7 +57,6 @@ export const UserList = (props) => {
     return (
 
         <List
-            className="demo-loadmore-list"
             loading={initLoading}
             itemLayout="horizontal"
             loadMore={loadMore}

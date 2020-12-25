@@ -1,0 +1,27 @@
+﻿.info-bar {
+   display: flex; 
+   flex-direction: row;
+   justify-content: space-between;
+}
+
+.task-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.task-header h1 {
+    margin: 0;
+}
+
+.task-edit-button {
+    margin-left: 2rem;
+}
+
+
+
+
+/*.task-edit-button {*/
+/*   align-self: center; */
+/*}*/
