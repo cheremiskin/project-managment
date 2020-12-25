@@ -68,7 +68,9 @@ namespace project_managment.Controllers
 
         [HttpPost]
         [ValidateModel]
-        public async Task<IActionResult> PostTask([FromBody]CreateTaskForm form, [Required, FromQuery(Name = "projectId")] long projectId)
+        public async Task<IActionResult> PostTask([FromBody]CreateTaskForm form, 
+                        [Required, FromQuery(Name = "projectId")] long projectId)
+        
         {
             var accessLevel = await GetAccessLevelForProject(projectId);
             switch (accessLevel)
@@ -79,6 +81,15 @@ namespace project_managment.Controllers
                     var id = await _taskRepository.Save(task);
                     if (id == 0)
                         throw TaskException.PostFailed();
+
+                    if (form.AssignedUsers != null)
+                    {
+                        foreach (var userId in form.AssignedUsers)
+                        {
+                            var link = await _taskRepository.LinkUserAndTask(userId, id);
+                        }
+                    }
+                    
                     return Created($"/api/tasks/{id}", await _taskRepository.FindById(id));
                 default:
                     throw ProjectException.AccessDenied();

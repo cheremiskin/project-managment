@@ -8,7 +8,7 @@ import '../../../assets/styles/components/TaskList.css'
 import {CreateTaskForm} from "../../CreateTaskForm";
 
 
-const CreateTaskModal = ({visible, onCancel, onCreate}) => {
+const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
     const [form] = Form.useForm();
     
     return (
@@ -23,6 +23,14 @@ const CreateTaskModal = ({visible, onCancel, onCreate}) => {
                     .then(values => {
                         console.log(values)
                         form.resetFields();
+                        values.date = values.date.format('YYYY-MM-DD')
+                        values.time = values.time.format('HH:mm:ss')
+                        
+                        values.expirationDate = values.date + 'T' + values.time;
+                        delete values.date; delete values.time;
+                        
+                        values.assignedUsers =  values.assignedUsers.map(id => parseInt(id))
+                        
                         onCreate(values)
                     })
                     .catch(info => {
@@ -30,46 +38,46 @@ const CreateTaskModal = ({visible, onCancel, onCreate}) => {
                     })
             }}
             >
-           <CreateTaskForm form = {form}/> 
+           <CreateTaskForm form = {form} users = {assignableUsers}/> 
         </Modal>
     )
 }
-
 
 const token = localStorage.getItem('token')
 
 export const TaskList = (props) => {
 
     const [tasks, setTasks] = useState([]);
-    
     const [createModalVisible, setCreateModalVisible] = useState(false)
+    const [usersInProject, setUsersInProject] = useState([])
     
+    const loadTasks = (projectId, token, callback) => {
+        HttpProvider.auth(router.task.list({projectId: projectId}), token).then(res => {
+            console.log(res)
+            callback(res)
+        })
+    }
     
     const deleteTask = (taskId)  => {
-        HttpProvider.auth_delete(router.task.one(taskId), token).then(
-            response => {
-                HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
-                    setTasks(res)                    
-                })
-            }
-        )
+        HttpProvider.auth_delete(router.task.one(taskId), token)
+            .then(() => loadTasks(props.params.projectId, token, setTasks))
     }
     
     const createTask = (values) => {
         HttpProvider.auth_post(router.task.create({projectId : props.params.projectId}), values, token)
-            .then(
-                response => {
-                    HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
-                        setTasks(res)
-                    })
-                })
+            .then(() => loadTasks(props.params.projectId, token, setTasks))
     }
     
     useEffect(()=>{
-        HttpProvider.get(router.task.list({projectId: props.params.projectId})).then(res => {
-            setTasks(res)
-        })
+        loadTasks(props.params.projectId, token, setTasks)
     }, []);
+    
+    useEffect(() => {
+        
+        HttpProvider.auth(router.project.users(props.params.projectId), token).then(users => {
+            setUsersInProject(users)
+        })
+    }, [])
 
     return (
         <>
@@ -84,7 +92,9 @@ export const TaskList = (props) => {
                 onCreate = {(values) => {
                     createTask(values)
                     setCreateModalVisible(false)
-                }}/>
+                }}
+                assignableUsers={usersInProject}
+            />
 
             <div className = 'task-container'>
                 {

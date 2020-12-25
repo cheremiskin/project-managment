@@ -47,7 +47,11 @@ const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
           <Input />
         </Form.Item>
         <Form.Item name="info" label="Bio">
-          <Input.TextArea />
+          <Input.TextArea 
+              rows = {5}
+              showCount={true}
+              maxLength={512}
+          />
         </Form.Item>
         <Form.Item name="birthDate" label = "Birth Date">
           <DatePicker />
@@ -147,18 +151,16 @@ export const User = (props) => {
 
 
     const onUpdateHandle = (payload) => {
-        setUserMeLoading(true)
+        setUserLoading(true)
         
-        payload.birthDate = payload.birthDate.toISOString().split('T')[0] 
+        payload.birthDate = payload.birthDate.format('YYYY-MM-DD');
+        
         HttpProvider.auth_put(router.user.one(userMe.id), payload, token).then( response => {
-            if (response.status === 200)
-                HttpProvider.auth(router.user.one(userMe.id), token).then(entity => {
+                HttpProvider.auth(router.user.me(), token).then(entity => {
                     console.log('NEW ME', entity)
-                    setUserMe(entity)
-                    setUserMeLoading(false)
+                    setUser(entity)
+                    setUserLoading(false)
                 })
-            else 
-                setUserMeLoading(false)
         })
         
         setEditModalVisible(false)
