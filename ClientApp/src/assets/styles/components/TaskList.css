@@ -1,0 +1,14 @@
+﻿.task-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.task-container .task-card {
+   margin-bottom: 1rem; 
+}
+
+#create-button {
+    margin-bottom: 1rem;
+}

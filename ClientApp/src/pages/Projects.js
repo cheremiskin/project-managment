@@ -8,7 +8,7 @@ export const Projects = (props) => {
     const [projects, setProjects] = useState([]);
 
     useEffect(() => {
-        HttpProvider.get(router.project.list()).then(res => {
+        HttpProvider.auth(router.project.list(), localStorage.getItem('token')).then(res => {
             setProjects(res.map((item, index) => <ProjectCard {...item} key={index}/>));
         });
     }, []);

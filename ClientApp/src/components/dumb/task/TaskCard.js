@@ -1,14 +1,26 @@
 import React from 'react';
 import { Card } from 'antd';
+import {Typography} from "antd";
+
+import '../../../assets/styles/components/TaskCard.css'
+
+const {Paragraph} = Typography
 
 const TaskCard = (props) => {
+    const {task, onMore, onDelete} = props
+    
     return (
         <Card 
-            title="T"
-            // extra={<a href={`/project/${props.id}`}>More</a>}
-            style={{marginBottom: 20, width: 600}}
+            className = 'task-card'
+            title= {task.title}
+            actions = {[<a href= {`/task/${task.id}`}>More</a>, <span onClick = {onDelete}>Delete</span>]}
         >
-        Task
+            <div className = 'task-content'>
+                <Paragraph ellipsis={{ 
+                    rows: 4,
+                    onExpand: {onMore}
+                }}>{task.content}</Paragraph>
+            </div>
         </Card>
     )
 }

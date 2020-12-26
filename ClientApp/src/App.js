@@ -14,15 +14,21 @@ import {makeStore} from './store'
 
 const store = makeStore()
 
+import {UserList} from "./pages/UserList";
+import {Task} from "./pages/Task";
+
 export default class App extends Component {
   static displayName = App.name;
 
   render () {
     return (
+
       <Provider store={store}>
         <Layout>
           <Route exact path='/' component={Home} />
+          <Route exact path='/users' component = {UserList} />
           <Route path='/user/:id' component={User} />
+          <Route path='/task/:id' component={Task}/>
           <Route path='/projects/' component={Projects} />
           <Route path='/project/:id' component={ProjectDetail} />
           <Route path='/redux-test' component={ReduxTest} />

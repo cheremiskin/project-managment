@@ -21,6 +21,9 @@ namespace project_managment.Forms
         public DateTime ExpirationDate { get; set; }
         [JsonPropertyName("executionTime")]
         public DateTime ExecutionTime { get; set; }
+        
+        [JsonPropertyName("assignedUsers")]
+        public long[] AssignedUsers { get; set; }
 
         public Task ToTask()
         {

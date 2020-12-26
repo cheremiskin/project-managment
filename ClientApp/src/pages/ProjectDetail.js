@@ -10,6 +10,7 @@ export const ProjectDetail = (props) => {
 
     useEffect(() => {
         HttpProvider.get(router.project.one(props.match.params.id)).then(res => {
+            console.log('PROJECT',res)
             setProject(res);
         });
     }, []);
