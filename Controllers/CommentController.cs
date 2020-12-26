@@ -116,7 +116,7 @@ namespace project_managment.Controllers
             {
                 case AccessLevel.Admin: case AccessLevel.Creator:
                     await _commentRepository.Update(update.ToComment(id));
-                    return Ok();
+                    return NoContent();
                 default:
                     throw CommentException.AccessDenied();
             }

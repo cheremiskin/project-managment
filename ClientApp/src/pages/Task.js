@@ -1,7 +1,7 @@
 ﻿import React, {useState, useEffect} from 'react'
 import HttpProvider from "../HttpProvider";
 import {router} from "../router";
-import {Collapse, Form, Select, Spin, Button, List, Input} from "antd";
+import {Modal, Collapse, Form, Select, Spin, Button, List, Input} from "antd";
 import {UserView} from "../components/dumb/user/UserView";
 import {Link} from "react-router-dom";
 import moment from "moment";
@@ -11,6 +11,7 @@ import {RightOutlined} from "@ant-design/icons";
 import '../assets/styles/pages/Task.css'
 import {TaskComment} from "../components/dumb/task/Comment";
 import {CreateCommentForm} from "../components/CreateCommentForm";
+import {CreateTaskForm} from "../components/CreateTaskForm";
 
 const {Option} = Select
 const {Panel} = Collapse
@@ -37,15 +38,58 @@ const loadComment = (commentId, token, callback) => {
     HttpProvider.auth(router.comment.one(commentId), token).then(callback)
 }
 
+const loadUsersInProject = (projectId, token, callback) => {
+    HttpProvider.auth(router.project.users(projectId), token).then(callback)
+}
+
+const updateTask = (taskId, token, payload, callback) => {
+    HttpProvider.auth_put(router.task.one(taskId), payload, token).then(callback)
+}
+
 const token = localStorage.getItem('token')
 
-// создатель проекта 
-// название проекта 
-// тайтл
-// контент 
-// статусы, текущий статус
-// дата создания
-// 
+const EditTaskModal = ({task, onEdit, onCancel, visible, assignedUsers, allUsers}) => {
+    const [form] = Form.useForm()
+    
+    return (
+        <Modal
+            title = 'Edit' 
+            okText = 'Edit'
+            cancelText = 'Cancel'
+            visible = {visible}
+            onCancel = {onCancel}
+            onOk = {() => {
+                form.validateFields()
+                    .then((values) => {
+
+                        values.date = values.date.format('YYYY-MM-DD')
+                        values.time = values.time.format('HH:mm:ss')
+                        
+                        values.expirationDate = values.date + 'T' + values.time;
+                        delete values.date; delete values.time;
+                        
+                        values.assignedUsers = values.assignedUsers.map(id => parseInt(id))
+                        
+                        onEdit(values)
+                    })
+            } }
+        >
+            <CreateTaskForm 
+                form = {form}
+                users = {allUsers}
+                initialValues = {{
+                    title: task.title,
+                    content: task.content,
+                    assignedUsers: assignedUsers.map(user => user.id.toString()),
+                    date: moment(new Date(task.expirationDate)),
+                    time: moment(new Date(task.expirationDate))
+                }}
+                
+            />            
+        </Modal>
+    )
+    
+}
 
 export const Task = (props) => {
     const [task, setTask] = useState({})
@@ -60,18 +104,21 @@ export const Task = (props) => {
     const [project, setProject] = useState({})
     
     const [comments, setComments] = useState([])
+    const [userComments, setUserComments] = useState({})
+    
+    const [usersInProject, setUsersInProject] = useState([])
+    const [editModalVisible, setEditModalVisible] = useState(false)
+    
     
     useEffect(() => {
        loadTask(props.match.params.id, token, (result) => {
            loadProject(result.projectId, token, (proj) => {
                loadUser(proj.creatorId, token, (projectCreator) => {
-                   console.log('PROJECT CREATOR',projectCreator)
                    setCreator(projectCreator)
                })
-               console.log('PROJECT', proj)
                setProject(proj)
            })
-           console.log('TASK', result)
+           loadUsersInProject(result.projectId, token, setUsersInProject)
            setTask(result)
            setTaskLoading(false)
        } ) 
@@ -92,7 +139,21 @@ export const Task = (props) => {
     
     useEffect(() => {
         HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
-            .then(res => { setComments(res) })
+            .then(res => { 
+                let userIds = new Set(res.map(c => c.userId))
+                
+                userIds.forEach((userId) => {
+                    loadUser(userId, token, (user) => {
+                        setUserComments(prev => {
+                            let copy = {...prev}
+                            copy[userId] = user
+                            return copy
+                        })
+                    })
+                })
+                
+                setComments(res)
+            })
     }, [])
     
     const uploadComment = (comment) => {
@@ -114,7 +175,7 @@ export const Task = (props) => {
     
     return (
         <>
-            {taskLoading ? <Spin /> :
+            {taskLoading || users.length === 0 ? <Spin /> :
                 <>
                     <Link tag = {Link} to={`/project/${task.projectId}`}> <RightOutlined /> <b>{project.name}</b></Link>
                     <hr/>
@@ -130,7 +191,37 @@ export const Task = (props) => {
                     <hr/>
                     <div className = 'task-header'>
                         <h1> {task.title}</h1>
-                        <Button className = 'task-edit-button' type = 'dashed'>edit</Button>
+                        <Button 
+                            className = 'task-edit-button' 
+                            type = 'dashed' 
+                            onClick = {() => {
+                                setEditModalVisible(true); 
+                                console.log(editModalVisible)
+                            }}
+                        >
+                            edit
+                        </Button>
+                        
+                        <EditTaskModal 
+                            task = {task}
+                            visible = {editModalVisible}
+                            assignedUsers={users}
+                            allUsers={usersInProject}
+                            onCancel = {() => setEditModalVisible(false)} 
+                            onEdit = {(values) => {
+                                setEditModalVisible(false)
+                                updateTask(task.id, token, values, () => {
+                                    loadTask(task.id, token, (task) => {
+                                        setUsersLoading(true)
+                                        HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
+                                            setUsers(users)
+                                            setUsersLoading(false)
+                                        })
+                                        setTask(task)
+                                    })
+                                })
+                            } }
+                        />
                     </div>
                     <div> Expires on the {moment(task.expirationDate).format('YYYY-MM-DD HH:mm')}</div>
                     <h5>{task.content}</h5> 
@@ -157,19 +248,20 @@ export const Task = (props) => {
             </>
         }
         
-        <div className = 'comment-section'>
-            {comments.map(c => 
-            <TaskComment
-                key={c.id}
-                user = {{id: 2, fullName: 'Admin'}}
-                comment = {c}
-            />)}
-            <CreateCommentForm 
-                className = 'comment-create-form'
-                onCreate = {uploadComment}
-            />
-        </div>
-            
+            <div className = 'comment-section'>
+                {comments.length > 0 && Object.keys(userComments).length > 0 &&
+                    comments.map(c =>
+                        <TaskComment
+                            key={c.id}
+                            user={userComments[c.userId] ?? {id : 0, fullName: 'Dummy'}}
+                            comment={c}
+                        />)
+                }
+                <CreateCommentForm
+                    className = 'comment-create-form'
+                    onCreate = {uploadComment}
+                />
+            </div>
         </>
     ) 
     

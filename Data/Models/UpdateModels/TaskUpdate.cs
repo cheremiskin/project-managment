@@ -18,6 +18,9 @@ namespace pm.Models.UpdateModels
         [JsonPropertyName("statusId")]
         public int StatusId { get; set; }
 
+        [JsonPropertyName("assignedUsers")] 
+        public long[] AssignedUsers { get; set; }
+
         public Task ToTask(long id)
         {
             return new Task

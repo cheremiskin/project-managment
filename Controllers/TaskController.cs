@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.IdentityModel.Tokens;
 using pm.Models;
 using pm.Models.Links;
@@ -113,7 +115,7 @@ namespace project_managment.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> PutTask(long id, [FromBody] TaskUpdate task)
+        public async Task<IActionResult> PutTask(long id, [FromBody] TaskUpdate form)
         {
             var accessLevel = await GetAccessLevelForTask(id);
             switch (accessLevel)
@@ -121,13 +123,33 @@ namespace project_managment.Controllers
                 case AccessLevel.Creator: case AccessLevel.Admin: 
                     try
                     {
-                        await _taskRepository.Update(task.ToTask(id));
+                        await _taskRepository.Update(form.ToTask(id));
+
+                        var currentAssignedUsers = await _userRepository.FindAllUsersInTask(id);
+
+                        var currentAssignedUsersIds = currentAssignedUsers.Select(u => u.Id);
+                        var assignUsersIds = new List<long>(form.AssignedUsers);
+
+                        var toDeleteIds = currentAssignedUsersIds.Except(form.AssignedUsers);
+                        var toAddIds = assignUsersIds.Except(currentAssignedUsersIds);
+                        
+                        foreach (var userId in toDeleteIds)
+                        {
+                            await _taskRepository.UnlinkUserAndTask(userId, id);
+                        }
+
+                        foreach (var userId in toAddIds)
+                        {
+                            await _taskRepository.LinkUserAndTask(userId, id);
+                        }
+
                     }
                     catch (Exception ex)
                     {
                         throw TaskException.UpdateFail();
                     }
-                    return Ok();
+
+                    return NoContent();
                 default:
                     throw TaskException.AccessDenied();
             }

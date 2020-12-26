@@ -9,7 +9,6 @@ export const TaskComment = (props) => {
     
     const {comment, user} = props 
     
-    
     return (
        <Comment
            author = {<Link tag = {Link} to={`/user/${user.id}`}> {user.fullName}</Link>}
