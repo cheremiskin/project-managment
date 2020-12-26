@@ -1,13 +1,16 @@
 ﻿import React, {useState, useEffect} from 'react'
 import HttpProvider from "../HttpProvider";
 import {router} from "../router";
-import {Collapse, Form, Select, Spin, Button} from "antd";
+import {Collapse, Form, Select, Spin, Button, List, Input} from "antd";
 import {UserView} from "../components/dumb/user/UserView";
 import {Link} from "react-router-dom";
 import moment from "moment";
-import {EditOutlined} from "@ant-design/icons"; 
+
+import {RightOutlined} from "@ant-design/icons";
 
 import '../assets/styles/pages/Task.css'
+import {TaskComment} from "../components/dumb/task/Comment";
+import {CreateCommentForm} from "../components/CreateCommentForm";
 
 const {Option} = Select
 const {Panel} = Collapse
@@ -30,6 +33,10 @@ const loadProject = (projectId, token, callback) => {
     })
 }
 
+const loadComment = (commentId, token, callback) => {
+    HttpProvider.auth(router.comment.one(commentId), token).then(callback)
+}
+
 const token = localStorage.getItem('token')
 
 // создатель проекта 
@@ -50,9 +57,9 @@ export const Task = (props) => {
     const [statuses, setStatuses] = useState([])
     
     const [creator, setCreator]  = useState({})
-    
     const [project, setProject] = useState({})
     
+    const [comments, setComments] = useState([])
     
     useEffect(() => {
        loadTask(props.match.params.id, token, (result) => {
@@ -79,10 +86,25 @@ export const Task = (props) => {
     
     useEffect(() => {
         HttpProvider.get(router.task.statuses()).then((result) => {
-            console.log('STATUSES', result)
             setStatuses(result)
         })
     }, [])
+    
+    useEffect(() => {
+        HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
+            .then(res => { setComments(res) })
+    }, [])
+    
+    const uploadComment = (comment) => {
+        HttpProvider.auth_post(router.comment.list({taskId: props.match.params.id}),comment, token)
+            .then( res => {
+                if (res.id){
+                   loadComment(res.id, token, (comment) => {
+                       setComments(prevComments => prevComments.concat([comment]))
+                   }) 
+                }
+            })
+    }
     
     const onStatusChange = (status) => {
         const payload = {statusId: status}
@@ -94,7 +116,7 @@ export const Task = (props) => {
         <>
             {taskLoading ? <Spin /> :
                 <>
-                    <Link tag = {Link} to={`/project/${task.projectId}`}>Back to <b>{project.name}</b></Link>
+                    <Link tag = {Link} to={`/project/${task.projectId}`}> <RightOutlined /> <b>{project.name}</b></Link>
                     <hr/>
                     <div className = 'info-bar'>
                         <span> Opened {moment(task.creationDate).format('YYYY-MM-DD')} by <Link tag = {Link} to = {`/user/${creator.id}`}> {creator.fullName} </Link> </span>
@@ -105,29 +127,48 @@ export const Task = (props) => {
                             {statuses.map(s => <Option key = {s.id} value = {s.id}>{s.name}</Option>)} 
                         </Select>
                     </div>
+                    <hr/>
                     <div className = 'task-header'>
                         <h1> {task.title}</h1>
                         <Button className = 'task-edit-button' type = 'dashed'>edit</Button>
                     </div>
                     <div> Expires on the {moment(task.expirationDate).format('YYYY-MM-DD HH:mm')}</div>
-                    <h4> {task.content}</h4>
+                    <h5>{task.content}</h5> 
                 </>
             }
             {usersLoading ? <Spin /> :
                 <>
-                    <Collapse defaultActivateKey = {['1']} >
+                    <Collapse 
+                        defaultActivateKey = {['1']}
+                    >
                         <Panel key={'1'} header = 'Assigned users'>
                             {users.map(user =>
-                                <UserView
-                                    key = {user.id}
-                                    user = {user}
-                                    withFullName
-                                />)}
+                                    
+                                <Link tag = {Link} to = {`/user/${user.id}`}>
+                                    <UserView
+                                        key = {user.id}
+                                        user = {user}
+                                        withFullName
+                                    />
+                                </Link>)}
+                                
                         </Panel>
-                        
                     </Collapse>
             </>
         }
+        
+        <div className = 'comment-section'>
+            {comments.map(c => 
+            <TaskComment
+                key={c.id}
+                user = {{id: 2, fullName: 'Admin'}}
+                comment = {c}
+            />)}
+            <CreateCommentForm 
+                className = 'comment-create-form'
+                onCreate = {uploadComment}
+            />
+        </div>
             
         </>
     ) 

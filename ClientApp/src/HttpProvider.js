@@ -35,7 +35,7 @@ class HttpProvider {
             }
             
             console.log('response: ', response)
-            return response;
+            return response.json();
         })
     }
 
