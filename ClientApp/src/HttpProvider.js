@@ -10,7 +10,7 @@ class HttpProvider {
                 const error = new Error(response.statusText);
                 console.error(error);
             }
-
+            
             return response.json();
         })
     }
