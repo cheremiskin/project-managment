@@ -14,11 +14,14 @@ namespace project_managment.Data.Repositories.RepositoryImpl
 {
     public class TaskRepository : BaseRepository, ITaskRepository
     {
-        private const string TaskMappingString = "id as Id, title as Title, status_id as StatusId, content as Content, project_id as ProjectId, creation_date as CreationDate, expiration_date as ExpirationDate, execution_time as ExecutionTime";
+        private const string TaskMappingString = "id as Id, title as Title, status_id as StatusId, content as Content, " +
+                                                 "project_id as ProjectId, creation_date as CreationDate, " +
+                                                 "expiration_date as ExpirationDate, execution_time as ExecutionTime, " +
+                                                 "creator_id as CreatorId";
         private const string TableFieldsString = "id, title, status_id, content, project_id, creation_date, expiration_date, execution_time";
         private const string ObjectFieldsString = "@Id, @Title, @StatusId, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
-        private const string TableFieldsWithoutIdString = "title, status_id, content, project_id, creation_date, expiration_date, execution_time";
-        private const string ObjectFieldsWithoutIdString = "@Title, @StatusId, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime";
+        private const string TableFieldsWithoutIdString = "title, status_id, content, project_id, creation_date, expiration_date, execution_time, creator_id";
+        private const string ObjectFieldsWithoutIdString = "@Title, @StatusId, @Content, @ProjectId, @CreationDate, @ExpirationDate, @ExecutionTime, @CreatorId";
         private const string TableName = "tasks";
 
         public TaskRepository(IConfiguration configuration) : base(configuration)

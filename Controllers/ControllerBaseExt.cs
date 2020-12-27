@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -79,8 +80,14 @@ namespace project_managment.Controllers
             var task = await _taskRepository.FindById(taskId);
             if (task == null)
                 throw TaskException.NotFound();
+            
             Cache.Task = task;
-            return await GetAccessLevelForProject(task.ProjectId);
+            var result = await GetAccessLevelForProject(task.ProjectId);
+
+            if (task.CreatorId == GetClientId() && result == AccessLevel.Member)
+                result = AccessLevel.TaskCreatorAndMember;
+
+            return result;
         }
 
         protected async Task<AccessLevel> GetAccessLevelForComment(long commentId)
@@ -98,9 +105,10 @@ namespace project_managment.Controllers
             return await GetAccessLevelForTask(comment.TaskId);
         }
 
+        [Flags]
         public enum AccessLevel
         {
-            Member, Creator, Admin, Anonymous, None
+            Member, Creator, Admin, Anonymous, TaskCreatorAndMember, None
         }
 
         protected class CacheAccumulator

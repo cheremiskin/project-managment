@@ -74,7 +74,7 @@ namespace project_managment.Controllers
             
             switch (accessLevel)
             {
-                case AccessLevel.Admin: case AccessLevel.Creator: case AccessLevel.Member:
+                case AccessLevel.Admin: case AccessLevel.Creator: case AccessLevel.Member: case AccessLevel.TaskCreatorAndMember:
                     var comment = form.ToComment();
                     var userId = GetClientId();
                     comment.TaskId = taskId;

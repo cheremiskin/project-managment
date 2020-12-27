@@ -63,6 +63,7 @@ namespace project_managment.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateModel]
         public async Task<IActionResult> PostUser(RegistrationForm form)
         {
             var role = GetClientRoleClaim()?.Value;

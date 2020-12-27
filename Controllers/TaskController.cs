@@ -77,16 +77,21 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForProject(projectId);
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin:
+                case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.Member:
                     var task = form.ToTask();
                     task.ProjectId = projectId;
+                    task.CreatorId = GetClientId();
+                    
                     var id = await _taskRepository.Save(task);
                     if (id == 0)
                         throw TaskException.PostFailed();
 
                     if (form.AssignedUsers != null)
                     {
-                        foreach (var userId in form.AssignedUsers)
+                        var membersIds =
+                            (Cache.ProjectMembers ?? await _userRepository.FindAllUsersInProject(projectId))
+                            .Select(m => m.Id);
+                        foreach (var userId in form.AssignedUsers.Intersect(membersIds))
                         {
                             var link = await _taskRepository.LinkUserAndTask(userId, id);
                         }
@@ -103,9 +108,10 @@ namespace project_managment.Controllers
         public async Task<IActionResult> DeleteTask(long id)
         {
             var accessLevel = await GetAccessLevelForTask(id);
+            
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin:
+                case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.TaskCreatorAndMember:
                     await _taskRepository.RemoveById(id);
                     return NoContent();
                 default:
@@ -120,33 +126,34 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForTask(id);
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin: 
+                case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.TaskCreatorAndMember:
                     try
                     {
                         await _taskRepository.Update(form.ToTask(id));
 
                         if (form.AssignedUsers != null)
                         {
+                            var currentAssignedUsers = await _userRepository.FindAllUsersInTask(id);
+                            var membersIds 
+                                = (Cache.ProjectMembers ?? 
+                                   await _userRepository.FindAllUsersInProject(Cache.Task.ProjectId)).Select(m => m.Id);
+
+                            var currentAssignedUsersIds = currentAssignedUsers.Select(u => u.Id);
+                            var assignUsersIds = new List<long>(form.AssignedUsers);
+
+                            var toDeleteIds = currentAssignedUsersIds.Except(form.AssignedUsers).Intersect(membersIds);
+                            var toAddIds = assignUsersIds.Except(currentAssignedUsersIds).Intersect(membersIds);
                             
-                        var currentAssignedUsers = await _userRepository.FindAllUsersInTask(id);
+                            foreach (var userId in toDeleteIds)
+                            {
+                                await _taskRepository.UnlinkUserAndTask(userId, id);
+                            }
 
-                        var currentAssignedUsersIds = currentAssignedUsers.Select(u => u.Id);
-                        var assignUsersIds = new List<long>(form.AssignedUsers);
-
-                        var toDeleteIds = currentAssignedUsersIds.Except(form.AssignedUsers);
-                        var toAddIds = assignUsersIds.Except(currentAssignedUsersIds);
-                        
-                        foreach (var userId in toDeleteIds)
-                        {
-                            await _taskRepository.UnlinkUserAndTask(userId, id);
+                            foreach (var userId in toAddIds)
+                            {
+                                await _taskRepository.LinkUserAndTask(userId, id);
+                            }
                         }
-
-                        foreach (var userId in toAddIds)
-                        {
-                            await _taskRepository.LinkUserAndTask(userId, id);
-                        }
-                        }
-
                     }
                     catch (Exception ex)
                     {
@@ -167,13 +174,14 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForTask(id);
             switch (accessLevel)
             {
-                case AccessLevel.Member: case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.Anonymous:
+                case AccessLevel.Member: case AccessLevel.Creator: 
+                case AccessLevel.Admin: case AccessLevel.Anonymous:
+                case AccessLevel.TaskCreatorAndMember:
                     var users = await _userRepository.FindAllUsersInTask(id);
                     return Ok(users.Select(u => new UserDto(u)));
                 default:
                     throw ProjectException.AccessDenied();
             }
-            
         }
 
         [HttpPost]
@@ -184,7 +192,7 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForTask(taskId);
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin:
+                case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.TaskCreatorAndMember:
                     var userProjectLink = await _projectRepository.FindLink(userId, Cache.Project.Id);
 
                     if (userProjectLink == null)
@@ -208,7 +216,7 @@ namespace project_managment.Controllers
             var accessLevel = await GetAccessLevelForTask(taskId);
             switch (accessLevel)
             {
-                case AccessLevel.Creator: case AccessLevel.Admin:
+                case AccessLevel.Creator: case AccessLevel.Admin: case AccessLevel.TaskCreatorAndMember:
                     await _taskRepository.UnlinkUserAndTask(userId, taskId);
                     return NoContent(); 
                 default:
