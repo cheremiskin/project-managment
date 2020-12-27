@@ -109,6 +109,8 @@ export const Task = (props) => {
     const [usersInProject, setUsersInProject] = useState([])
     const [editModalVisible, setEditModalVisible] = useState(false)
     
+    const [taskCreator, setTaskCreator] = useState({})
+    
     
     useEffect(() => {
        loadTask(props.match.params.id, token, (result) => {
@@ -119,6 +121,7 @@ export const Task = (props) => {
                setProject(proj)
            })
            loadUsersInProject(result.projectId, token, setUsersInProject)
+           loadUser(result.creatorId, token, setTaskCreator)
            setTask(result)
            setTaskLoading(false)
        } ) 
@@ -175,12 +178,12 @@ export const Task = (props) => {
     
     return (
         <>
-            {taskLoading || users.length === 0 ? <Spin /> :
+            {taskLoading || usersLoading ? <Spin /> :
                 <>
                     <Link tag = {Link} to={`/project/${task.projectId}`}> <RightOutlined /> <b>{project.name}</b></Link>
                     <hr/>
                     <div className = 'info-bar'>
-                        <span> Opened {moment(task.creationDate).format('YYYY-MM-DD')} by <Link tag = {Link} to = {`/user/${creator.id}`}> {creator.fullName} </Link> </span>
+                        <span> Opened {moment(task.creationDate).format('YYYY-MM-DD')} by <Link tag = {Link} to = {`/user/${taskCreator.id}`}> {taskCreator.fullName} </Link> </span>
                         <Select
                             defaultValue = {task.statusId}
                             onChange = {onStatusChange}

@@ -12,6 +12,7 @@ namespace pm.Models
         public int StatusId { get; set; }
         public string Content { get; set; }
         public long ProjectId { get; set; }
+        public long CreatorId { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public DateTime? ExecutionTime { get; set; }

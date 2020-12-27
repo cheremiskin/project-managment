@@ -68,7 +68,8 @@ CREATE TABLE tasks(
     expiration_date TIMESTAMP DEFAULT NULL,
     status_id INT NULL,
     execution_time TIMESTAMP DEFAULT NULL,
-    project_id BIGINT NOT NULL
+    project_id BIGINT NOT NULL,
+    creator_id BIGINT NOT NULL
 );
 
 ALTER TABLE tasks ADD CONSTRAINT tasks_status_id_fk 
@@ -78,6 +79,10 @@ ON DELETE SET NULL;
 ALTER TABLE tasks ADD CONSTRAINT tasks_project_id_fk 
 FOREIGN KEY(project_id) REFERENCES projects(id)
 ON DELETE CASCADE;
+
+ALTER TABLE tasks ADD CONSTRAINT tasks_creator_id_fk 
+FOREIGN KEY(creator_id) REFERENCES users(id)
+ON DELETE SET NULL;
 
 CREATE TABLE comments(
     id BIGINT PRIMARY KEY DEFAULT nextval('comments_id_seq'),
