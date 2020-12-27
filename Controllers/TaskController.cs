@@ -125,6 +125,9 @@ namespace project_managment.Controllers
                     {
                         await _taskRepository.Update(form.ToTask(id));
 
+                        if (form.AssignedUsers != null)
+                        {
+                            
                         var currentAssignedUsers = await _userRepository.FindAllUsersInTask(id);
 
                         var currentAssignedUsersIds = currentAssignedUsers.Select(u => u.Id);
@@ -141,6 +144,7 @@ namespace project_managment.Controllers
                         foreach (var userId in toAddIds)
                         {
                             await _taskRepository.LinkUserAndTask(userId, id);
+                        }
                         }
 
                     }
