@@ -12,7 +12,7 @@ const tailLayout = {
 const RegistrationForm = (props) => {
   const onFinish = values => {
     console.log('Success:', values);
-    fetch('api/users/register',{
+    fetch('api/users/',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8'
@@ -28,7 +28,7 @@ const RegistrationForm = (props) => {
   return (
     <Form
       {...layout}
-      name="basic"
+      name="registration"
       initialValues={{ remember: true }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
@@ -97,8 +97,6 @@ const RegistrationForm = (props) => {
       >
         <Input.Password />
       </Form.Item>
-
-     
 
       <Form.Item {...tailLayout}>
         <Button type="primary" htmlType="submit">

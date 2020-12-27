@@ -15,6 +15,8 @@ class HttpProvider {
         })
     }
 
+    
+
     static _send(url, method = 'POST', data = {}, headers = {}) {
         console.log('POST: ', data);
         console.log('Headers', headers);
@@ -35,7 +37,7 @@ class HttpProvider {
             }
             
             console.log('response: ', response)
-            return response;
+            return response.json();
         })
     }
 
