@@ -13,7 +13,9 @@ class Home extends Component {
       <div>
         <Tabs defaultActiveKey="1">
           <Tabs.TabPane tab="Sign In" key="1">
-            {this.props.state.profile.token}
+            {
+              this.props.user && this.props.user.fullName
+            }
             <SignInForm />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Registration" key="2">
@@ -28,7 +30,7 @@ class Home extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    state: state
+    user: state.profile.user
   }
 }
 

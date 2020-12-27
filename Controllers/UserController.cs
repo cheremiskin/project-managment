@@ -97,7 +97,7 @@ namespace project_managment.Controllers
             }
 
             _userRepository.Update(user.ToUser(id));
-            return Ok();
+            return NoContent();
         }
 
         [HttpDelete]

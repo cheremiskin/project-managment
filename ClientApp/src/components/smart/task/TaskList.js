@@ -6,11 +6,11 @@ import TaskCard from '../../dumb/task/TaskCard';
 
 import '../../../assets/styles/components/TaskList.css'
 import {CreateTaskForm} from "../../CreateTaskForm";
+import moment from "moment";
 
 
 const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
     const [form] = Form.useForm();
-    
     return (
         <Modal
             title = 'Create Task'
@@ -38,7 +38,15 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
                     })
             }}
             >
-           <CreateTaskForm form = {form} users = {assignableUsers}/> 
+           <CreateTaskForm 
+               form = {form} 
+               users = {assignableUsers}
+               initialValues={{
+                   date : moment(new Date(), 'YYYY-MM-dd'),
+                   time : moment(new Date(), 'HH:mm'),
+                   assignedUsers: []
+               }}
+           /> 
         </Modal>
     )
 }
@@ -64,6 +72,7 @@ export const TaskList = (props) => {
     }
     
     const createTask = (values) => {
+        console.log(values)
         HttpProvider.auth_post(router.task.create({projectId : props.params.projectId}), values, token)
             .then(() => loadTasks(props.params.projectId, token, setTasks))
     }
@@ -95,7 +104,6 @@ export const TaskList = (props) => {
                 }}
                 assignableUsers={usersInProject}
             />
-
             <div className = 'task-container'>
                 {
                     tasks.map((item, index) => 

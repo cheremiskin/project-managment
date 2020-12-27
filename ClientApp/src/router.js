@@ -24,7 +24,8 @@ export const router = {
         statuses: () => `/api/tasks/statuses`
     },
     comment: {
-        list: (params = {}) => addParams(`/api/comments`, params),
+        list: (params = {}) => addParams(`/api/comments?`, params),
+        one: (id) => `/api/comments/${id}`
     },
     user: {
         me : () => `/api/users/me`,

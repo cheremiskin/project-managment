@@ -5,18 +5,14 @@ import moment from 'moment'
 const {TextArea} = Input
 const {Option} = Select
 
-export const CreateTaskForm = ({form, users}) => {
-    
+export const CreateTaskForm = ({form, users, initialValues}) => {
+
     return (
         <Form 
             form = {form}
             layout = 'vertical'
             name = 'create_task_form'
-            initialValues={{
-                date : moment(new Date(), 'YYYY-MM-dd'),
-                time : moment(new Date(), 'HH:mm'),
-                assignedUsers: []
-            }}
+            initialValues={initialValues}
             >
             <Form.Item 
                 label = 'Title'
@@ -66,9 +62,7 @@ export const CreateTaskForm = ({form, users}) => {
                 label = 'Assign users'
                 name = 'assignedUsers'
             >
-                <Select
-                    mode = 'multiple'
-                >
+                <Select mode = 'multiple'>
                     {users.map((user) => <Option key = {user.id}>{user.fullName}</Option>)}
                 </Select>
             </Form.Item>

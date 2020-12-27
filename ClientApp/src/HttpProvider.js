@@ -18,25 +18,23 @@ class HttpProvider {
     
 
     static _send(url, method = 'POST', data = {}, headers = {}) {
-        console.log('POST: ', data);
-        console.log('Headers', headers);
         return fetch(`${API_ROOT}${url}`, {
             method: method,
-            // mode: 'cors',
-            // headers : new Headers(...headers),
             headers : {
                 'Content-Type': 'application/json;charset=UTF-8',
                 ...headers
             },
             body : JSON.stringify(data)
         }).then((response) => {
-            console.log(this);
+            
             if (!response.ok) {
                 const error = new Error(response.statusText);
                 console.error("error: ", error);
             }
             
-            console.log('response: ', response)
+
+            if (response.status === 204)
+                return {}
             return response.json();
         })
     }
@@ -54,7 +52,7 @@ class HttpProvider {
     }
     
     static auth(url, token = '') {
-        return this.get(url, {headers: {'Authorization': token}});
+        return this.get(url, {headers: {'Authorization': `Bearer ${token}`}});
     }
 
     static auth_post(url, data, token = '') {

@@ -7,9 +7,9 @@ import { Projects } from './pages/Projects';
 import { User } from './pages/User';
 import './assets/styles/App.css';
 import ReduxTest from './pages/ReduxTest';
-
 import {UserList} from "./pages/UserList";
 import {Task} from "./pages/Task";
+
 import { Provider } from 'react-redux'
 
 import {makeStore} from './store'

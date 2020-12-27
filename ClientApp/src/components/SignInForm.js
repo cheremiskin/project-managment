@@ -1,8 +1,9 @@
 import React from 'react';
 import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
-import { signIn } from '../actions/signIn';
+import { getToken } from '../actions/getToken';
 import {connect} from 'react-redux';
 import HttpProvider from '../HttpProvider';
+import { getUser } from '../actions/getUser';
 
 const layout = {
   labelCol: { span: 8 },
@@ -15,18 +16,18 @@ const tailLayout = {
 const SignInForm = (props) => {
   const onFinish = values => {
     console.log('Success:', values);
-    // fetch('api/token/',{
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json;charset=utf-8'
-    //   },
-    //   body: JSON.stringify(values)
-    // })
-    HttpProvider.post('api/token/', {values})
+    HttpProvider.post('api/token/', values)
     .then (
         (res) => {
             console.log('res', res);
-            props.signIn(res.access_token);
+            props.getToken(res.access_token);
+            
+            HttpProvider.auth('/api/users/me', res.access_token)
+            .then (
+                (res) => {
+                    props.getUser(res);
+                }
+            )
         }
     )
   };
@@ -70,4 +71,4 @@ const SignInForm = (props) => {
   );
 }
 
-export default connect(() => ({}), {signIn})(SignInForm);
+export default connect(() => ({}), {getToken, getUser})(SignInForm);

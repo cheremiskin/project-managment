@@ -81,6 +81,7 @@ namespace project_managment.Controllers
                     comment.UserId = userId;
                     var commentId = await _commentRepository.Save(comment);
                     return Created($"/api/comments/{commentId}", new {id = commentId});
+                    // return Ok(await _commentRepository.FindById(commentId)) ;
                 case AccessLevel.Anonymous: case AccessLevel.None:
                     throw TaskException.AccessDenied();
             }
@@ -115,7 +116,7 @@ namespace project_managment.Controllers
             {
                 case AccessLevel.Admin: case AccessLevel.Creator:
                     await _commentRepository.Update(update.ToComment(id));
-                    return Ok();
+                    return NoContent();
                 default:
                     throw CommentException.AccessDenied();
             }

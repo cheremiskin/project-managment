@@ -6,7 +6,12 @@ const initialState = {
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case 'SIGN_IN':
+        case 'GET_TOKEN':
+            return {
+                ...state,
+                ...action.payload
+            }
+        case 'GET_USER':
             return {
                 ...state,
                 ...action.payload
