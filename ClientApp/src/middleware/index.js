@@ -1,5 +1,6 @@
 import {applyMiddleware, compose} from "redux";
 import thunk from "redux-thunk";
+import { stateToLocalStorage } from "./stateToLocalStorage";
 
 const reduxDevtools =
     typeof window !== "undefined" && process.env.NODE_ENV !== "production"
@@ -9,6 +10,6 @@ const reduxDevtools =
 
 export const middleware = compose(
     // applyMiddleware(thunk),
-    thunk
-    // reduxDevtools
+    applyMiddleware(thunk, stateToLocalStorage),
+    reduxDevtools
 );

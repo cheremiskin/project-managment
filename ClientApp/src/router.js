@@ -28,7 +28,7 @@ export const router = {
         one: (id) => `/api/comments/${id}`
     },
     user: {
-        me : () => `/api/users/me`,
+        me : '/api/users/me/',
         one: (id) => `/api/users/${id}`,
         many: (page, size) => addParams(`/api/users?`, {page : page, size: size}),
         createdProjects: (id) => `/api/users/${id}/created-projects`,

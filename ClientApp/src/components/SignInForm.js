@@ -16,12 +16,11 @@ const tailLayout = {
 
 const SignInForm = (props) => {
   const onFinish = values => {
-    console.log('Success:', values);
     HttpProvider.post('api/token/', values)
     .then (
         (res) => {
             console.log('res', res);
-            props.setToken(`Bearer ${res.access_token}`);
+            props.setToken(`${res.access_token}`);
             
             HttpProvider.auth('/api/users/me', res.access_token).then (
                 (res) => {
