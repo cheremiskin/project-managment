@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Form, Modal, Button} from 'antd'
+import {Form, Modal, Button, Select} from 'antd'
 import HttpProvider from '../../../HttpProvider';
 import { router } from '../../../router';
 import TaskCard from '../../dumb/task/TaskCard';
@@ -7,6 +7,8 @@ import TaskCard from '../../dumb/task/TaskCard';
 import '../../../assets/styles/components/TaskList.css'
 import {CreateTaskForm} from "../../CreateTaskForm";
 import moment from "moment";
+
+const {Option} = Select
 
 
 const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
@@ -56,8 +58,10 @@ const token = localStorage.getItem('token')
 export const TaskList = (props) => {
     
     const [tasks, setTasks] = useState([]);
+    const [taskList, setTaskList] = useState([])
     const [createModalVisible, setCreateModalVisible] = useState(false)
     const [usersInProject, setUsersInProject] = useState([])
+    const [usersInTasks, setUsersInTasks] = useState({})
     
     const loadTasks = (projectId, token, callback) => {
         HttpProvider.auth(router.task.list({projectId: projectId}), token).then(res => {
@@ -77,8 +81,15 @@ export const TaskList = (props) => {
             .then(() => loadTasks(props.params.projectId, token, setTasks))
     }
     
+    const filterByUser = (userId) => {
+        
+    }
+    
     useEffect(()=>{
-        loadTasks(props.params.projectId, token, setTasks)
+        loadTasks(props.params.projectId, token, (tasks) => {
+            setTasks(tasks)
+            setTaskList(tasks)
+        })
     }, []);
     
     useEffect(() => {
@@ -104,9 +115,17 @@ export const TaskList = (props) => {
                 }}
                 assignableUsers={usersInProject}
             />
+            
+            <Select
+               defaultValue={0}
+            >
+                <Option key = {0} value = {0}>None</Option>
+                {usersInProject.map(user => 
+                    <Option key = {user.id} value = {user.id}>{user.fullName}</Option>)} 
+            </Select>
             <div className = 'task-container'>
                 {
-                    tasks.map((item, index) => 
+                    taskList.map((item, index) => 
                     <TaskCard
                         task = {item}
                         key={index}

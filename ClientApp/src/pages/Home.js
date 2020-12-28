@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import RegistrationForm from '../components/RegistrationForm';
 import SignInForm from '../components/SignInForm';
 import { connect } from 'react-redux';
+import {Link} from "react-router-dom";
 
 class Home extends Component {
   static displayName = Home.name;
@@ -14,7 +15,7 @@ class Home extends Component {
         <Tabs defaultActiveKey="1">
           <Tabs.TabPane tab="Sign In" key="1">
             {
-              this.props.user && this.props.user.fullName
+              this.props.user && <Link to = {`/user/${this.props.user.id}`}>{this.props.user.fullName}</Link>
             }
             <SignInForm />
           </Tabs.TabPane>
@@ -30,7 +31,7 @@ class Home extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    user: state.profile.user
+    user: state.user.user
   }
 }
 

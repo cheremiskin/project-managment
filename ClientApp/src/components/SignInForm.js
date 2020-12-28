@@ -1,9 +1,10 @@
 import React from 'react';
 import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
-import { getToken } from '../actions/getToken';
 import {connect} from 'react-redux';
 import HttpProvider from '../HttpProvider';
-import { getUser } from '../actions/getUser';
+
+import {setUser, setEnrolledProjects, setToken, setCreatedProjects} from "../store/user/actions";
+import {router} from "../router";
 
 const layout = {
   labelCol: { span: 8 },
@@ -20,14 +21,17 @@ const SignInForm = (props) => {
     .then (
         (res) => {
             console.log('res', res);
-            props.getToken(res.access_token);
+            props.setToken(`Bearer ${res.access_token}`);
             
-            HttpProvider.auth('/api/users/me', res.access_token)
-            .then (
+            HttpProvider.auth('/api/users/me', res.access_token).then (
                 (res) => {
-                    props.getUser(res);
+                    props.setUser(res);
+                    HttpProvider.auth(router.user.createdProjects(res.id)).then(props.setCreatedProjects)
+                    HttpProvider.auth(router.user.enrolledProjects(res.id)).then(props.setEnrolledProjects)
+                    
                 }
             )
+            
         }
     )
   };
@@ -71,4 +75,8 @@ const SignInForm = (props) => {
   );
 }
 
-export default connect(() => ({}), {getToken, getUser})(SignInForm);
+const mapDispatchToProps = {
+   setToken, setCreatedProjects, setEnrolledProjects, setUser 
+}
+
+export default connect(() => ({}), mapDispatchToProps)(SignInForm);
