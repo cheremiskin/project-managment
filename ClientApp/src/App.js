@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import Home from './pages/Home';
-import { ProjectDetail } from './pages/ProjectDetail';
-import { Projects } from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
+import Projects from './pages/Projects';
 import './assets/styles/App.css';
-import { UserList } from "./pages/UserList";
-import { Task } from "./pages/Task";
+import UserList from "./pages/UserList";
+import Task from "./pages/Task";
 import { Route } from 'react-router';
 import Layout from './components/Layout';
 import Profile from './pages/profile/ProfileContainer'

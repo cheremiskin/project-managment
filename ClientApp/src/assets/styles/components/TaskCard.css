@@ -2,10 +2,6 @@
     width: 300px;
 }
 
-.task-card .ant-card-action {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+.expiration-time {
+    font-size: 0.7rem;
 }
-

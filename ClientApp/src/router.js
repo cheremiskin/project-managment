@@ -11,9 +11,10 @@ const addParams = (url, params = {}) => {
 export const router = {
     project: {
         list: (params = {}) => addParams(`/api/projects`, params),
-        one: (id) => `api/projects/${id}`,
+        one: (id) => `/api/projects/${id}`,
         users: (id) => `/api/projects/${id}/users`,
-        addUser: (projectId, userId) => addParams(`/api/projects/${projectId}/users?`, {userId: userId})
+        addUser: (projectId, userId) => addParams(`/api/projects/${projectId}/users?`, {userId: userId}),
+        create: () => `/api/projects`
     },
     task: {
         list: (params = {}) => addParams(`/api/tasks?`, params),

@@ -4,6 +4,7 @@ import {router} from "../router";
 import {Modal, Collapse, Form, Select, Spin, Button, List, Input} from "antd";
 import {UserView} from "../components/dumb/user/UserView";
 import {Link} from "react-router-dom";
+import {connect} from 'react-redux'
 import moment from "moment";
 
 import {RightOutlined} from "@ant-design/icons";
@@ -12,6 +13,7 @@ import '../assets/styles/pages/Task.css'
 import {TaskComment} from "../components/dumb/task/Comment";
 import {CreateCommentForm} from "../components/CreateCommentForm";
 import {CreateTaskForm} from "../components/CreateTaskForm";
+import {setUser} from "../store/user/actions";
 
 const {Option} = Select
 const {Panel} = Collapse
@@ -92,6 +94,9 @@ const EditTaskModal = ({task, onEdit, onCancel, visible, assignedUsers, allUsers
 }
 
 export const Task = (props) => {
+    
+    const {token, user, setUser, authenticated} = props
+    
     const [task, setTask] = useState({})
     const [taskLoading, setTaskLoading] = useState(true)
     
@@ -111,19 +116,18 @@ export const Task = (props) => {
     
     const [taskCreator, setTaskCreator] = useState({})
     
-    
-    useEffect(() => {
-       loadTask(props.match.params.id, token, (result) => {
-           loadProject(result.projectId, token, (proj) => {
-               loadUser(proj.creatorId, token, (projectCreator) => {
-                   setCreator(projectCreator)
-               })
-               setProject(proj)
-           })
-           loadUsersInProject(result.projectId, token, setUsersInProject)
-           loadUser(result.creatorId, token, setTaskCreator)
-           setTask(result)
-           setTaskLoading(false)
+    useEffect(() => {  
+        loadTask(props.match.params.id, token, (result) => {
+            loadProject(result.projectId, token, (proj) => {
+                loadUser(proj.creatorId, token, (projectCreator) => {
+                    setCreator(projectCreator)
+                })
+                setProject(proj)
+            })
+            loadUsersInProject(result.projectId, token, setUsersInProject)
+            loadUser(result.creatorId, token, setTaskCreator)
+            setTask(result)
+            setTaskLoading(false)
        } ) 
     }, [])
     
@@ -143,6 +147,7 @@ export const Task = (props) => {
     useEffect(() => {
         HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
             .then(res => { 
+                debugger
                 let userIds = new Set(res.map(c => c.userId))
                 
                 userIds.forEach((userId) => {
@@ -267,5 +272,19 @@ export const Task = (props) => {
             </div>
         </>
     ) 
-    
 }
+
+const mapStateToProps = (state) => {
+    debugger
+    return {
+        token: state.user.token,
+        user: state.user.user, 
+        authenticated: state.user.token !== null
+    }
+}
+
+const mapActionsToDispatch = {
+    setUser
+}
+
+export default connect(mapStateToProps, mapActionsToDispatch)(Task)

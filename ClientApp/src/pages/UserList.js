@@ -4,13 +4,15 @@ import React, {useEffect, useState} from "react";
 import HttpProvider from "../HttpProvider";
 import {router} from "../router";
 import {Link} from "react-router-dom";
+import {connect} from 'react-redux'
 
 const {Paragraph} = Typography
 
 const pageSize = 3
-const token = localStorage.getItem('token')
 
 export const UserList = (props) => {
+    const {token} = props
+    
     const [initLoading, setInitLoading] = useState(true)
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
@@ -80,5 +82,12 @@ export const UserList = (props) => {
             )}
         />
     )
-
 }
+
+const mapStateToProps = (state) => {
+    return {
+        token: state.user.token
+    }
+}
+
+export default connect(mapStateToProps, {})(UserList)

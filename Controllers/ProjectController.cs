@@ -58,7 +58,7 @@ namespace project_managment.Controllers
             {
                case AccessLevel.Admin: case AccessLevel.Creator: case AccessLevel.Member: case AccessLevel.Anonymous:
                    return Ok(Cache.Project ?? await _projectRepository.FindById(id));
-               case AccessLevel.None:
+               default:
                    throw ProjectException.AccessDenied();
             }
             return StatusCode((int) HttpStatusCode.InternalServerError);
@@ -90,9 +90,8 @@ namespace project_managment.Controllers
 
             long id =  _projectRepository.Save(project).Result;
             _projectRepository.LinkUserAndProjectById(user.Id, id);
-            project.Id = id;
 
-            return Created($"/api/projects/{id}", project); // should return id
+            return Created($"/api/projects/{id}", new {id = id}); // should return id
         }
         
         [HttpPut]

@@ -42,7 +42,7 @@ export class NavMenu extends Component {
                 </NavItem>
                 {this.props.authenticated && this.props.user &&
                   <NavItem>
-                    <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile</NavLink>
+                    <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile {this.props.user.isAdmin && '(Admin)'}</NavLink>
                   </NavItem>
                 }
               </ul>
