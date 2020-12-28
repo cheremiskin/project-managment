@@ -97,28 +97,28 @@ const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
 
 export const Profile = (props) => {
     const {
-            user, authenticated, setUser, userProjects, userEnrolledProjects, token,
-            setUserProjects, setUserEnrolledProjects,
-            profileUser, profileCreatedProjects, profileEnrolledProjects,
-            setProfileEnrolledProjects, setProfileCreatedProjects, 
-            setProfileUser
+            user, authenticated, setUser, token,
         } = props
     
     const [editModalVisible, setEditModalVisible] = useState(false)
     const [addModalVisible, setAddModalVisible] = useState(false)
+    
+    const [userCreatedProjects, setUserCreatedProjects] = useState([])
+    
+    const [profileUser, setProfileUser] = useState({})
     const [profileUserLoading, setProfileUserLoading] = useState(true)
+    const [profileCreatedProjects, setProfileCreatedProjects] = useState([])
     const [createdProjectsLoading, setCreatedProjectsLoading] = useState(true)
+    const [profileEnrolledProjects, setProfileEnrolledProjects] = useState([])
     const [enrolledProjectsLoading, setEnrolledProjectsLoading] = useState(true)
     
     useEffect(() => {   
         const targetUserId = props.match.params.id
         
-        const myProfile = authenticated && targetUserId === user.id 
+        const myProfile = authenticated && user && targetUserId === user.id 
         
         console.log('My profile: ', myProfile)
         console.log('Authenticated: ', authenticated)
-        console.log('My projects', userProjects)
-        console.log('My enrolled projects', userEnrolledProjects)
         
         if (authenticated) {
             HttpProvider.auth(router.user.one(targetUserId), token)
@@ -129,19 +129,17 @@ export const Profile = (props) => {
 
             HttpProvider.auth(router.user.createdProjects(targetUserId), token)
                 .then((projects) => {
-                    if (myProfile){
-                        setUserProjects(projects)
-                    }
                     setProfileCreatedProjects(projects)
                     setCreatedProjectsLoading(false)
                 })
             HttpProvider.auth(router.user.enrolledProjects(targetUserId), token)
                 .then((projects) => {
-                    if (myProfile){
-                        setUserEnrolledProjects(projects)
-                    }
                     setProfileEnrolledProjects(projects)
                     setEnrolledProjectsLoading(false)
+                })
+            HttpProvider.auth(router.user.createdProjects(user.id), token)
+                .then((projects) => {
+                    setUserCreatedProjects(projects)
                 })
         } else {
             HttpProvider.get(router.user.one(props.match.params.id))
@@ -167,7 +165,6 @@ export const Profile = (props) => {
         HttpProvider.auth_put(router.user.one(userId), payload, token)
             .then(() => {
                 HttpProvider.auth(router.user.one(userId), token).then((responseUser) => {
-                    debugger
                     setProfileUser(responseUser)
                     if (userId === user.id){
                         setUser(responseUser)
@@ -192,7 +189,7 @@ export const Profile = (props) => {
     }
 
 
-    const myProfile = authenticated && user.id === parseInt(props.match.params.id)
+    const myProfile = authenticated && user && user.id === parseInt(props.match.params.id)
     
     return (
         <>
@@ -228,14 +225,14 @@ export const Profile = (props) => {
                                 <div className = 'user-bio'>{profileUser.info ? user.info : 'Empty'}</div>
                             </div>
                         </div>
-                        { authenticated && !myProfile &&
+                        { authenticated && !myProfile && 
                         <div>
                             <Button type = 'primary' onClick = {() => setAddModalVisible(true)}>Add to project</Button>
                             <AssignToProjectModal
                                 visible = {addModalVisible}
                                 onCreate = {assignUserToProjects}
                                 onCancel = {() => setAddModalVisible(false)}
-                                projects = {userProjects.filter(p => !profileEnrolledProjects.some(pe => pe.id === p.id))}
+                                projects = {userCreatedProjects.filter(p => !profileEnrolledProjects.some(pe => pe.id === p.id))}
                             />
                         </div>
                         }

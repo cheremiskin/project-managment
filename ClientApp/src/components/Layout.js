@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { Container } from 'reactstrap';
 import HttpProvider from '../HttpProvider';
 import { router } from '../router';
-import { setUser } from '../store/user/actions';
-import { NavMenu } from './NavMenu';
+import { setUser, setToken } from '../store/user/actions';
+import NavMenu from './NavMenu';
 
 class Layout extends Component {
   static displayName = Layout.name;
@@ -19,6 +19,7 @@ class Layout extends Component {
 
       if (token !== null) {
         console.log("token ->", token);
+        this.props.setToken(token)
         HttpProvider.auth(router.user.me, token).then(
           (res) => {
             this.props.setUser(res); 
@@ -42,4 +43,4 @@ class Layout extends Component {
 }
 
 
-export default connect(() => ({}), {setUser})(Layout);
+export default connect(() => ({}), {setUser, setToken})(Layout);

@@ -23,8 +23,6 @@ const store = createStore(rootReducer, {}, middleware)
 export default class App extends Component {
   static displayName = App.name;
 
-  
-
   render() {
     return (
       <Provider store={store}>

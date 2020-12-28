@@ -19,17 +19,17 @@ const mapStateToProps = (state) =>{
         userProjects: state.user.createdProjects,
         userEnrolledProjects: state.user.enrolledProjects,
         
-        profileUser: state.profile.user,
-        profileCreatedProjects: state.profile.createdProjects,
-        profileEnrolledProjects: state.profile.enrolledProjects
+        // profileUser: state.profile.user,
+        // profileCreatedProjects: state.profile.createdProjects,
+        // profileEnrolledProjects: state.profile.enrolledProjects
     }
 }
 
 const mapDispatchToActions = {
     setUserProjects: setCreatedProjects,
     setUserEnrolledProjects: setEnrolledProjects,
-    setProfileCreatedProjects: setProfileCreatedProjects,
-    setProfileEnrolledProjects: setProfileEnrolledProjects,
+    // setProfileCreatedProjects: setProfileCreatedProjects,
+    // setProfileEnrolledProjects: setProfileEnrolledProjects,
     setUser: setUser,
     setProfileUser: setProfileUser
 }
