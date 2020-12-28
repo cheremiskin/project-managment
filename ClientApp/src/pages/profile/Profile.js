@@ -141,7 +141,7 @@ export const Profile = (props) => {
                         setUserEnrolledProjects(projects)
                     }
                     setProfileEnrolledProjects(projects)
-                    setCreatedProjectsLoading(false)
+                    setEnrolledProjectsLoading(false)
                 })
         } else {
             HttpProvider.get(router.user.one(props.match.params.id))
@@ -167,6 +167,7 @@ export const Profile = (props) => {
         HttpProvider.auth_put(router.user.one(userId), payload, token)
             .then(() => {
                 HttpProvider.auth(router.user.one(userId), token).then((responseUser) => {
+                    debugger
                     setProfileUser(responseUser)
                     if (userId === user.id){
                         setUser(responseUser)
