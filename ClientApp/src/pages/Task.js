@@ -31,25 +31,14 @@ const loadUser = (userId, token, callback) => {
     })
 }
 
-const loadProject = (projectId, token, callback) => {
-    HttpProvider.auth(router.project.one(projectId), token).then((result) => {
-        callback(result)
-    })
-}
-
 const loadComment = (commentId, token, callback) => {
     HttpProvider.auth(router.comment.one(commentId), token).then(callback)
 }
 
-const loadUsersInProject = (projectId, token, callback) => {
-    HttpProvider.auth(router.project.users(projectId), token).then(callback)
-}
 
 const updateTask = (taskId, token, payload, callback) => {
     HttpProvider.auth_put(router.task.one(taskId), payload, token).then(callback)
 }
-
-const token = localStorage.getItem('token')
 
 const EditTaskModal = ({task, onEdit, onCancel, visible, assignedUsers, allUsers}) => {
     const [form] = Form.useForm()
@@ -96,7 +85,7 @@ const EditTaskModal = ({task, onEdit, onCancel, visible, assignedUsers, allUsers
 
 export const Task = (props) => {
     
-    const {token, user, setUser, authenticated, tokenChecked} = props
+    const {token, user, authenticated, tokenChecked} = props
     
     const [task, setTask] = useState({})
     const [taskLoading, setTaskLoading] = useState(true)
@@ -210,7 +199,6 @@ export const Task = (props) => {
                     setTaskIsAccessible(false) 
                 })
         }
-        
         HttpProvider.get(router.task.statuses()).then((result) => {
             setStatuses(result)
         })
@@ -232,15 +220,20 @@ export const Task = (props) => {
                            copy[user.id] = user;
                            return copy
                        })
-                   }) 
+                   })
                 }
-            })
+            }).catch(error => {
+                openNotification('Failed to upload comment', '')
+        })
     }
     
     const onStatusChange = (status) => {
         const payload = {statusId: status}
         HttpProvider.auth_put(router.task.one(task.id), payload, token)
             .then(() => {task.statusId = status.key})
+            .catch(error => {
+                openNotification('Failed to change status', '')
+            })
     }
     
     debugger
@@ -250,6 +243,7 @@ export const Task = (props) => {
     
     const canLeaveComment = authenticated && user && usersInProject.some(u => u.id === user.id)
     const canEditTask = authenticated && user && (task.creatorId === user.id || user.isAdmin || project.creatorId === user.id)
+    const canChangeStatus = authenticated && user && (user.isAdmin || users.some(u => u.id === user.id))
     
     return (
         <>
@@ -259,12 +253,14 @@ export const Task = (props) => {
                     <hr/>
                     <div className = 'info-bar'>
                         <span> Opened {moment(task.creationDate).format('YYYY-MM-DD')} by <Link tag = {Link} to = {`/user/${taskCreator.id}`}> {taskCreator.fullName} </Link> </span>
-                        <Select
-                            defaultValue = {task.statusId}
-                            onChange = {onStatusChange}
-                        >
-                            {statuses.map(s => <Option key = {s.id} value = {s.id}>{s.name}</Option>)} 
-                        </Select>
+                        { !canChangeStatus ? <h6> {statuses.find(s => s.id === task.statusId).name}</h6>:
+                            <Select
+                                defaultValue = {task.statusId}
+                                onChange = {onStatusChange}
+                            >
+                                {statuses.map(s => <Option key = {s.id} value = {s.id}>{s.name}</Option>)}
+                            </Select>
+                        }
                     </div>
                     <hr/>
                     <div className = 'task-header'>

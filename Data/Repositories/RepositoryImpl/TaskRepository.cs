@@ -162,6 +162,15 @@ namespace project_managment.Data.Repositories.RepositoryImpl
                 await connection.ExecuteScalarAsync<bool>(sql, new {taskId = taskId}));
         }
 
+        public async Task<IEnumerable<Task>> FindAllTaskAssignedToUser(long projectId, long userId)
+        {
+            var sql = $@"SELECT {TaskMappingString} FROM {TableName} WHERE project_id = @projectId "+
+                            "and id in (select task_id from task_user where user_id = @userId)";
+            return await WithConnection(async connection =>
+                await connection.QueryAsync<Task>(sql, new {userId = userId, projectId = projectId}));
+
+        }
+
         public async Task<IEnumerable<Status>> FindAllStatuses()
         {
             var sql = $"select id as Id, name as Name from statuses";

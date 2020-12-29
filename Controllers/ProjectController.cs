@@ -26,11 +26,13 @@ namespace project_managment.Controllers
 
         private readonly IUserRepository _userRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly ITaskRepository _taskRepository;
         public ProjectController(IProjectRepository projectRepository, IUserRepository userRepository, ITaskRepository taskRepository, ICommentRepository commentRepository) : 
                 base(userRepository, projectRepository, taskRepository, commentRepository)
         {
             _projectRepository = projectRepository;
             _userRepository = userRepository;
+            _taskRepository = taskRepository;
         }
 
         [HttpGet]
@@ -155,6 +157,12 @@ namespace project_managment.Controllers
             switch (accessLevel)
             {
                 case AccessLevel.Admin: case AccessLevel.Creator:
+                    var tasks = await _taskRepository.FindAllTaskAssignedToUser(projectId, userId);
+                    foreach (var task in tasks)
+                    {
+                        await _taskRepository.UnlinkUserAndTask(userId, task.Id);
+                    }
+                    
                     bool result = await _projectRepository.UnlinkUserAndProjectById(userId, projectId);
                     if (!result)
                         throw ProjectException.UserProjectLinkDeletionFailed();

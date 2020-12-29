@@ -10,7 +10,7 @@ const {Paragraph} = Typography
 
 
 const TaskCard = (props) => {
-    const {task, onMore, onDelete, status} = props
+    const {task, onMore, onDelete, status, deletable} = props
     
     let expired = false
     
@@ -18,11 +18,15 @@ const TaskCard = (props) => {
         expired = true
     }
     
+    const actions = [<Link tag = {Link} to= {`/task/${task.id}`}>More</Link>]
+    if (deletable)
+        actions.push(<span onClick = {onDelete}>Delete</span>)
+    
     return (
         <Card 
             className = {'task-card' + (expired ? ' task-red-bordered' : '')}
             title= {`${task.title}  (${status})`}
-            actions = {[<Link tag = {Link} to= {`/task/${task.id}`}>More</Link>, <span onClick = {onDelete}>Delete</span>]}
+            actions = {actions}
         >
             <div className = 'task-content'>
                 <Paragraph ellipsis={{ 

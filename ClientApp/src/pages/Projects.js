@@ -10,7 +10,6 @@ export const Projects = (props) => {
 
     const {token, user, tokenChecked, authenticated} = props
     const [projects, setProjects] = useState(null);
-
     
     useEffect(() => {
         if (!tokenChecked)

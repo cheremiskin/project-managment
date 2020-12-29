@@ -9,3 +9,6 @@
     background: rgba(0, 0, 0, 0.1);
     padding: 0px 0.8rem;
 }
+.project-card__date {
+    font-size: 0.7rem;
+}

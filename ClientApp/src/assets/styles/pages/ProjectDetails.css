@@ -16,3 +16,21 @@
 .user-list {
     margin-bottom: 1rem;
 }
+
+.project-private {
+    border-radius: 4px;
+    padding: 0 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    justify-self: end;
+}
+
+.user-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+}
+
+.user-row span {
+    margin-right: 1rem;
+}

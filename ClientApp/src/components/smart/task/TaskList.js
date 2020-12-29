@@ -59,7 +59,7 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
 
 export const TaskList = (props) => {
     
-    const {token, canAdd} = props
+    const {token, canAdd, authenticated, user, project} = props
     
     const [tasks, setTasks] = useState([]);
     const [taskList, setTaskList] = useState(null)
@@ -136,6 +136,8 @@ export const TaskList = (props) => {
             setUsersInProject(users)
         })
     }, [])
+    
+    const canDeleteTasks = authenticated && user && (user.isAdmin || user.id === project.creatorId)
 
     return (
         <>
@@ -160,15 +162,6 @@ export const TaskList = (props) => {
                 }
 
                 <div className = 'filters-container'>
-                    {/*<Select*/}
-                    {/*    defaultValue={0}*/}
-                    {/*    value = {chosenUser}*/}
-                    {/*    onChange={value => setChosenUser(value)}*/}
-                    {/*>*/}
-                    {/*    <Option key = {0} value = {0}>Member</Option>*/}
-                    {/*    {usersInProject.map(user =>*/}
-                    {/*        <Option key = {user.id} value = {user.id}>{user.fullName}</Option>)}*/}
-                    {/*</Select>*/}
                     <Select
                         defaultValue = {0}
                         onChange={(payload) => {
@@ -188,6 +181,7 @@ export const TaskList = (props) => {
                         task = {item}
                         key={index}
                         status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
+                        deletable = {canDeleteTasks}
                         onDelete = {() => deleteTask(item.id)}/>
                 )}
             </div> 
@@ -197,7 +191,9 @@ export const TaskList = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        token: state.user.token
+        token: state.user.token,
+        authenticated: state.user.token !== null && state.user.tokenChecked,
+        user: state.user.user
     }
 }
 

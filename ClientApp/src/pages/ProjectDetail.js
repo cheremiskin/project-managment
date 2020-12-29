@@ -1,4 +1,5 @@
 import {Modal, Spin, Button, Form, Collapse} from 'antd';
+import {CloseOutlined} from "@ant-design/icons";
 import React, { useEffect, useState } from 'react';
 import TaskList from '../components/smart/task/TaskList';
 import HttpProvider from '../HttpProvider';
@@ -103,9 +104,19 @@ export const ProjectDetail = (props) => {
                     .then(setProject)
             })
     }
+    
+    const removeUserFromProject = (userId) => {
+        HttpProvider.auth_delete(router.project.addUser(props.match.params.id, userId), token)
+            .then((res) => {
+                HttpProvider.auth(router.project.users(props.match.params.id), token).then(us => {
+                    setUsers(us) 
+                })
+            })
+    }
 
     
-    if (!project || !tokenChecked || !users) return <Spin />
+    if (!project || !tokenChecked || !users) 
+        return <Spin />
     
     const canEdit = authenticated && user && (user.isAdmin || user.id === project.creatorId)
     
@@ -113,21 +124,22 @@ export const ProjectDetail = (props) => {
     
     return (
         <>
+            {project.isPrivate && <span className = 'project-private'>Private</span>}
             <div className = 'project-header'>
                 <h1>{project.name}</h1>
                 {canEdit &&
-                    <>
-                        <Button type='dashed' onClick={() => setEditModalVisible(true)}>Edit</Button>
-                        <EditProjectModal
-                            visible={editModalVisible}
-                            project={project}
-                            onCancel={() => setEditModalVisible(false)}
-                            onEdit = {(values) => {
-                                editProject(values)
-                                setEditModalVisible(false)
-                            }}
-                        />
-                    </>
+                <>
+                    <Button type='dashed' onClick={() => setEditModalVisible(true)}>Edit</Button>
+                    <EditProjectModal
+                        visible={editModalVisible}
+                        project={project}
+                        onCancel={() => setEditModalVisible(false)}
+                        onEdit = {(values) => {
+                            editProject(values)
+                            setEditModalVisible(false)
+                        }}
+                    />
+                </>
                 }
             </div>
             <div> Created by {creator ? <Link to = {`/user/${creator.id}`}>{creator.fullName}</Link> : '' } at {project ? moment(project.creationDate).format('YYYY-MM-DD HH:mm') : ''}</div>
@@ -139,13 +151,17 @@ export const ProjectDetail = (props) => {
                         defaultActivateKey = {['1']}
                     >
                         <Panel key={'1'} header = 'Assigned users'>
-                            {users.map(user =>
-                                <Link key = {user.id} tag = {Link} to = {`/user/${user.id}`}>
-                                    <UserView
-                                        user = {user}
-                                        withFullName
-                                    />
-                                </Link>)}
+                            {users.map(u =>
+                                <div className = 'user-row'>
+                                    {canEdit && user.id !== u.id &&<CloseOutlined onClick = {() => removeUserFromProject(u.id)} />}
+                                    <Link key = {u.id} tag = {Link} to = {`/user/${u.id}`}>
+                                        <UserView
+                                            user = {u}
+                                            withFullName
+                                        />
+                                    </Link>  
+                                </div>
+                                )}
 
                         </Panel>
                     </Collapse>
@@ -153,6 +169,7 @@ export const ProjectDetail = (props) => {
             }
             <TaskList
                 id={project.id}
+                project = {project}
                 canAdd = {authenticated}
                 params={{
                     projectId: project.id

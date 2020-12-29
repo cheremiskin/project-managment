@@ -13,6 +13,7 @@ namespace project_managment.Data.Repositories
         Task<TaskUser> LinkUserAndTask(long userId, long taskId);
         Task<bool> UnlinkUserAndTask(long userId, long taskId);
         Task<bool> UnlinkAllUsersFromTask(long taskId);
+        Task<IEnumerable<Task>> FindAllTaskAssignedToUser(long projectId, long userId);
 
         Task<IEnumerable<Status>> FindAllStatuses();
     }
