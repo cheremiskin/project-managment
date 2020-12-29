@@ -239,6 +239,8 @@ export const Profile = (props) => {
     
     const myProfile = authenticated && user && user.id === parseInt(props.match.params.id)
     
+    debugger
+    
     return (
         <>
             {
@@ -296,7 +298,10 @@ export const Profile = (props) => {
                         <ul>
                             {myProfile &&
                                 <>
-                                    <Button type = 'primary' onClick = {() => setAddProjectModalVisible(true)}>Create Project</Button>
+                                    <Button 
+                                        className = 'add-project-button'
+                                        type = 'primary' 
+                                        onClick = {() => setAddProjectModalVisible(true)}>Create Project</Button>
                                     <AddProjectModal 
                                         visible = {addProjectModalVisible}
                                         onCancel = {() => setAddProjectModalVisible(false)}

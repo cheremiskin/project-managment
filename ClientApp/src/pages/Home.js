@@ -36,7 +36,7 @@ const mapStateToProps = (state) => {
   return {
     user: state.user.user,
     token: state.user.token,
-    authenticated: state.user.token !== null,
+    authenticated: state.user.token !== null && state.user.tokenChecked,
   }
 }
 

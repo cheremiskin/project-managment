@@ -136,10 +136,10 @@ export const Task = (props) => {
 
 
             HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
+                debugger
                 setUsers(users)
                 setUsersLoading(false)
             })
-
 
             HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
                 .then(res => {
@@ -158,7 +158,44 @@ export const Task = (props) => {
                     setComments(res)
                 })
         } else {
-            
+            HttpProvider.get(router.task.one(props.match.params.id))
+                .then(payload => {
+                    debugger
+                    HttpProvider.get(router.project.one(payload.projectId)).then(proj => {
+                        HttpProvider.get(router.user.one(proj.creatorId)).then(setCreator)
+                        setProject(proj)
+                    })
+                    HttpProvider.get(router.project.users(payload.projectId)).then(payload => {
+                        setUsersInProject(payload)
+                    })
+                    HttpProvider.get(router.user.one(payload.creatorId)).then(setTaskCreator)
+
+                    setTask(payload)
+                    setTaskLoading(false)
+                    
+                    HttpProvider.get(router.task.users(props.match.params.id)).then((payload) => {
+                        debugger
+                        setUsers(payload)
+                        setUsersLoading(false)
+                    })
+                    
+                    HttpProvider.get(router.comment.list({taskId : props.match.params.id}))
+                        .then(res => {
+                            let userIds = new Set(res.map(c => c.userId))
+
+                            userIds.forEach((userId) => {
+                                HttpProvider.get(router.user.one(userId)).then( (user) => {
+                                    setUserComments(prev => {
+                                        let copy = {...prev}
+                                        copy[userId] = user
+                                        return copy
+                                    })
+                                })
+                            })
+
+                            setComments(res)
+                        })
+                })
         }
         
         HttpProvider.get(router.task.statuses()).then((result) => {
@@ -195,6 +232,9 @@ export const Task = (props) => {
     if (!tokenChecked)
         return <Spin />
     
+    const canLeaveComment = authenticated && user && usersInProject.some(u => u.id === user.id)
+    const canEditTask = authenticated && user && (task.creatorId === user.id || user.isAdmin || project.creatorId === user.id)
+    
     return (
         <>
             {taskLoading || usersLoading ? <Spin /> :
@@ -213,37 +253,41 @@ export const Task = (props) => {
                     <hr/>
                     <div className = 'task-header'>
                         <h1> {task.title}</h1>
-                        <Button 
-                            className = 'task-edit-button' 
-                            type = 'dashed' 
-                            onClick = {() => {
-                                setEditModalVisible(true); 
-                                console.log(editModalVisible)
-                            }}
-                        >
-                            edit
-                        </Button>
-                        
-                        <EditTaskModal 
-                            task = {task}
-                            visible = {editModalVisible}
-                            assignedUsers={users}
-                            allUsers={usersInProject}
-                            onCancel = {() => setEditModalVisible(false)} 
-                            onEdit = {(values) => {
-                                setEditModalVisible(false)
-                                updateTask(task.id, token, values, () => {
-                                    loadTask(task.id, token, (task) => {
-                                        setUsersLoading(true)
-                                        HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
-                                            setUsers(users)
-                                            setUsersLoading(false)
+                        {canEditTask&& 
+                        <>
+                            <Button
+                                className = 'task-edit-button'
+                                type = 'dashed'
+                                onClick = {() => {
+                                    setEditModalVisible(true);
+                                    console.log(editModalVisible)
+                                }}
+                            >
+                                edit
+                            </Button>
+
+                            <EditTaskModal
+                                task = {task}
+                                visible = {editModalVisible}
+                                assignedUsers={users}
+                                allUsers={usersInProject}
+                                onCancel = {() => setEditModalVisible(false)}
+                                onEdit = {(values) => {
+                                    setEditModalVisible(false)
+                                    updateTask(task.id, token, values, () => {
+                                        loadTask(task.id, token, (task) => {
+                                            setUsersLoading(true)
+                                            HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
+                                                setUsers(users)
+                                                setUsersLoading(false)
+                                            })
+                                            setTask(task)
                                         })
-                                        setTask(task)
                                     })
-                                })
-                            } }
-                        />
+                                } }
+                            />
+                        </> 
+                        }
                     </div>
                     <div> Expires on the {moment(task.expirationDate).format('YYYY-MM-DD HH:mm')}</div>
                     <h5>{task.content}</h5> 
@@ -279,10 +323,13 @@ export const Task = (props) => {
                             comment={c}
                         />)
                 }
-                <CreateCommentForm
-                    className = 'comment-create-form'
-                    onCreate = {uploadComment}
-                />
+                 
+                {canLeaveComment &&
+                    <CreateCommentForm
+                        className = 'comment-create-form'
+                        onCreate = {uploadComment}
+                    />
+                }
             </div>
         </>
     ) 

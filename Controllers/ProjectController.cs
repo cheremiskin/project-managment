@@ -112,9 +112,11 @@ namespace project_managment.Controllers
         
         [HttpGet]
         [Route("{projectId}/users")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetMembersOfProject([Required, FromRoute(Name = "projectId")] long projectId)
         {
             var accessLevel = await GetAccessLevelForProject(projectId);
+            
             switch (accessLevel)
             {
                 case AccessLevel.Admin: case AccessLevel.Member: case AccessLevel.Creator: case AccessLevel.Anonymous:
@@ -145,6 +147,7 @@ namespace project_managment.Controllers
 
         [HttpDelete]
         [Route("{projectId}/users")]
+        
         public async Task<IActionResult> DeleteLinkUserProject([Required, FromRoute(Name = "projectId")] long projectId,
                                             [Required, FromQuery(Name = "userId")] long userId)
         {

@@ -16,22 +16,29 @@ const tailLayout = {
 
 const SignInForm = (props) => {
   const onFinish = values => {
-    HttpProvider.post('api/token/', values)
-    .then (
-        (res) => {
-          if(!res.error_text) {
-            window.location.assign('/projects')
-            props.setToken(`Bearer ${res.access_token}`);
-            
-            HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
-                (res) => {
-                    props.setUser(res);
-                    props.setTokenChecked(true)
+    try{
+      HttpProvider.post('api/token/', values)
+          .then (
+              (res) => {
+                if(!res.error_text) {
+                  window.location.assign('/projects')
+                  props.setToken(`Bearer ${res.access_token}`);
+
+                  HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
+                      (res) => {
+                        props.setUser(res);
+                        props.setTokenChecked(true)
+                      }
+                  )
                 }
-            )
-          }
-        }
-    )
+              }
+          ).catch((error) => {
+        alert('login failed')
+      })
+    } catch (error) {
+      alert(error)
+      console.log(error)
+    }
   };
 
   const onFinishFailed = errorInfo => {

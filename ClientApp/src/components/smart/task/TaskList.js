@@ -59,7 +59,7 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
 
 export const TaskList = (props) => {
     
-    const {token} = props
+    const {token, canAdd} = props
     
     const [tasks, setTasks] = useState([]);
     const [taskList, setTaskList] = useState(null)
@@ -140,20 +140,24 @@ export const TaskList = (props) => {
     return (
         <>
             <div className = 'control-panel'>
-                <Button id = 'create-button'
-                        onClick = {() => setCreateModalVisible(true)}
-                >
-                    Create New Task
-                </Button>
-                <CreateTaskModal
-                    visible={createModalVisible}
-                    onCancel={() => setCreateModalVisible(false)}
-                    onCreate = {(values) => {
-                        createTask(values)
-                        setCreateModalVisible(false)
-                    }}
-                    assignableUsers={usersInProject}
-                />
+                {canAdd &&
+                    <>
+                        <Button id = 'create-button'
+                                onClick = {() => setCreateModalVisible(true)}
+                        >
+                            Create New Task
+                        </Button>
+                        <CreateTaskModal
+                            visible={createModalVisible}
+                            onCancel={() => setCreateModalVisible(false)}
+                            onCreate = {(values) => {
+                                createTask(values)
+                                setCreateModalVisible(false)
+                            }}
+                            assignableUsers={usersInProject}
+                        />
+                    </>
+                }
 
                 <div className = 'filters-container'>
                     {/*<Select*/}

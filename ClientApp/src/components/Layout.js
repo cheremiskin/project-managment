@@ -22,12 +22,13 @@ class Layout extends Component {
         console.log("token ->", token);
         this.props.setToken(token)
         
-        HttpProvider.auth(router.user.me, token).then(
-          (res) => {
-            this.props.setUser(res);
-            this.props.setTokenChecked(true)
-          }
-        )
+        HttpProvider.auth(router.user.me, token)
+            .then(
+              (res) => {
+                this.props.setUser(res);
+                this.props.setTokenChecked(true)
+              }
+            )
       } else {
         this.props.setTokenChecked(true)
       }

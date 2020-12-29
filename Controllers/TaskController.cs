@@ -56,6 +56,7 @@ namespace project_managment.Controllers
 
         [HttpGet]
         [Route("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTask(long id)
         {
             var accessLevel = await GetAccessLevelForTask(id);
@@ -169,6 +170,7 @@ namespace project_managment.Controllers
         
         [HttpGet]
         [Route("{id}/users")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTaskUsers(long id)
         {
             var accessLevel = await GetAccessLevelForTask(id);

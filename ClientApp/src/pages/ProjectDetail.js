@@ -45,7 +45,6 @@ export const ProjectDetail = (props) => {
 
     const {token, authenticated, user, tokenChecked} = props
     
-    
     const [editModalVisible, setEditModalVisible]  = useState(false)
     const [project, setProject] = useState(null);
     const [creator, setCreator] = useState(null)
@@ -55,24 +54,29 @@ export const ProjectDetail = (props) => {
         if (!tokenChecked)
             return 
         
+        debugger
         if (authenticated){
-            HttpProvider.auth(router.project.one(props.match.params.id), token).then(res => {
-                setProject(res);
-                HttpProvider.auth(router.user.one(res.creatorId), token).then(setCreator)
-                
-                HttpProvider.auth(router.project.users(props.match.params.id), token).then(res => {
-                    setUsers(res)
-                })
+            HttpProvider.auth(router.project.one(props.match.params.id), token)
+                .then(res => {
+                    setProject(res);
+                    HttpProvider.auth(router.user.one(res.creatorId), token)
+                        .then(setCreator)
+                    HttpProvider.auth(router.project.users(props.match.params.id), token)
+                        .then(res => {
+                        setUsers(res)
+                    })
             });
             
         }
         else {
-            HttpProvider.get(router.project.one(props.match.params.id)).then(project => {
-                setProject(project)
-                HttpProvider.get(router.user.one(project.creatorId)).then(setCreator)
-            })
-            HttpProvider.get(router.project.users(props.match.params.id)).then((user) => {
-                setUsers(user)
+            HttpProvider.get(router.project.one(props.match.params.id)).then(res => {
+                    setProject(res)
+                    HttpProvider.get(router.user.one(res.creatorId))
+                        .then(setCreator)
+                    HttpProvider.get(router.project.users(props.match.params.id))
+                        .then((user) => {
+                        setUsers(user)
+                    })
             })
         }
         
@@ -92,6 +96,7 @@ export const ProjectDetail = (props) => {
     
     const canEdit = authenticated && user && (user.isAdmin || user.id === project.creatorId)
     
+    debugger
     
     return (
         <>
@@ -135,6 +140,7 @@ export const ProjectDetail = (props) => {
             }
             <TaskList
                 id={project.id}
+                canAdd = {authenticated}
                 params={{
                     projectId: project.id
                 }}

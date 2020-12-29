@@ -6,6 +6,8 @@ import {Link} from "react-router-dom";
 import {connect} from 'react-redux'
 import ProjectCard from '../../dumb/project/ProjectCard';
 
+import '../../../assets/styles/components/ProjectList.css'
+
 const {Paragraph} = Typography
 
 const pageSize = 3
