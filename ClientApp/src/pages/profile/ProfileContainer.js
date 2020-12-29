@@ -15,7 +15,8 @@ const mapStateToProps = (state) =>{
     return {
         user: state.user.user,
         token: state.user.token,
-        authenticated: state.user.token !== null,
+        authenticated: state.user.tokenChecked && state.user.token !== null,
+        tokenChecked: state.user.tokenChecked,
         userProjects: state.user.createdProjects,
         userEnrolledProjects: state.user.enrolledProjects,
         

@@ -3,18 +3,33 @@ import ProjectCard from '../components/dumb/project/ProjectCard';
 import HttpProvider from '../HttpProvider';
 import { router } from '../router';
 import {connect}  from 'react-redux'
+import {Spin} from 'antd'
 
 export const Projects = (props) => {
 
-    const {token, user} = props
-    const [projects, setProjects] = useState([]);
+    const {token, user, tokenChecked, authenticated} = props
+    const [projects, setProjects] = useState(null);
 
     
     useEffect(() => {
-        HttpProvider.auth(router.project.list(), token).then(res => {
-            setProjects(res)
-        });
-    }, []);
+        if (!tokenChecked)
+            return
+        
+        debugger
+        
+        if (authenticated){
+            HttpProvider.auth(router.project.list(), token).then(res => {
+                setProjects(res)
+            });
+        } else {
+            HttpProvider.get(router.project.list()).then((response) => {
+                setProjects(response)
+            })
+        }
+    }, [tokenChecked]);
+    
+    if (!projects || !tokenChecked) 
+        return <Spin />
 
     
     return (
@@ -26,11 +41,11 @@ export const Projects = (props) => {
 }
 
 const mapStateToProps = (state) => {
-    debugger
     return {
         token: state.user.token,
         user: state.user.user,
-        authenticated: state.user.token !== null
+        authenticated: state.user.token !== null && state.user.tokenChecked,
+        tokenChecked: state.user.tokenChecked
     }
 }
 

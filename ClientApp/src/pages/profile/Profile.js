@@ -125,7 +125,7 @@ const AddProjectModal = ({onCreate, onCancel, visible}) => {
 
 export const Profile = (props) => {
     const {
-            user, authenticated, setUser, token,
+            user, authenticated, setUser, token, tokenChecked
         } = props
     
     const [editModalVisible, setEditModalVisible] = useState(false)
@@ -142,12 +142,14 @@ export const Profile = (props) => {
     const [enrolledProjectsLoading, setEnrolledProjectsLoading] = useState(true)
     
     useEffect(() => {   
+        if (!tokenChecked){
+            return
+        }
+        
         const targetUserId = props.match.params.id
         
         const myProfile = authenticated && user && targetUserId === user.id 
         
-        console.log('My profile: ', myProfile)
-        console.log('Authenticated: ', authenticated)
         
         if (authenticated && user) {
             HttpProvider.auth(router.user.one(targetUserId), token)
@@ -188,9 +190,8 @@ export const Profile = (props) => {
                 })
         }
 
-    }, [user, token]) 
+    }, [tokenChecked]) 
     
-
     const onUpdateHandle = (userId, payload) => {
         HttpProvider.auth_put(router.user.one(userId), payload, token)
             .then(() => {
@@ -231,6 +232,9 @@ export const Profile = (props) => {
             })
     }
 
+    
+    if (!tokenChecked) 
+        return <Spin />
     
     const myProfile = authenticated && user && user.id === parseInt(props.match.params.id)
     

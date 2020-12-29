@@ -11,8 +11,9 @@ class HttpProvider {
                 console.error(error);
             }
             
-            if (response.status === 204)
+            if (response.status === 204 || response.status === 401){
                 return {}
+            }
             
             return response.json();
         })
