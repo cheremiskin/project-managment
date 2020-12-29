@@ -4,6 +4,7 @@ import HttpProvider from '../HttpProvider';
 import { router } from '../router';
 import {connect}  from 'react-redux'
 import {Spin} from 'antd'
+import { ProjectList } from '../components/smart/projects/ProjectList';
 
 export const Projects = (props) => {
 
@@ -14,8 +15,6 @@ export const Projects = (props) => {
     useEffect(() => {
         if (!tokenChecked)
             return
-        
-        debugger
         
         if (authenticated){
             HttpProvider.auth(router.project.list(), token).then(res => {
@@ -30,12 +29,11 @@ export const Projects = (props) => {
     
     if (!projects || !tokenChecked) 
         return <Spin />
-
     
     return (
         <>
-            <h1>Projects </h1>
-            {projects.map((item, index) => <ProjectCard {...item} key={index}/>)}
+            <h1>Projects</h1>
+            <ProjectList withLoadMore/>
         </>
     );
 }
