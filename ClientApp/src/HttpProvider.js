@@ -11,6 +11,9 @@ class HttpProvider {
                 console.error(error);
             }
             
+            if (response.status === 204)
+                return {}
+            
             return response.json();
         })
     }
@@ -52,7 +55,7 @@ class HttpProvider {
     }
     
     static auth(url, token = '') {
-        return this.get(url, {headers: {'Authorization': `Bearer ${token}`}});
+        return this.get(url, {headers: {'Authorization': token}});
     }
 
     static auth_post(url, data, token = '') {

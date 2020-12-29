@@ -20,9 +20,9 @@ const SignInForm = (props) => {
     .then (
         (res) => {
             console.log('res', res);
-            props.setToken(`${res.access_token}`);
+            props.setToken(`Bearer ${res.access_token}`);
             
-            HttpProvider.auth('/api/users/me', res.access_token).then (
+            HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
                 (res) => {
                     props.setUser(res);
                     HttpProvider.auth(router.user.createdProjects(res.id)).then(props.setCreatedProjects)

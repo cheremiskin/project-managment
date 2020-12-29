@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import {connect} from 'react-redux'
 import '../assets/styles/components/NavMenu.css';
 
 export class NavMenu extends Component {
@@ -34,14 +35,16 @@ export class NavMenu extends Component {
                   <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
                 </NavItem>
                 <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/user">Profile</NavLink>
-                </NavItem>
-                <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/users">Users</NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/projects">Projects</NavLink>
                 </NavItem>
+                {this.props.authenticated && this.props.user &&
+                  <NavItem>
+                    <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile {this.props.user.isAdmin && '(Admin)'}</NavLink>
+                  </NavItem>
+                }
               </ul>
             </Collapse>
           </Container>
@@ -50,3 +53,12 @@ export class NavMenu extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {  
+  return {
+    authenticated: state.user.token !== null,
+    user: state.user.user
+  }
+}
+
+export default connect(mapStateToProps, {})(NavMenu)

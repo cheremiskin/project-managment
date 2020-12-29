@@ -5,11 +5,13 @@ import {router} from '../../router'
 import moment from 'moment'
 
 import '../../assets/styles/pages/User.css'
+import {Link} from "react-router-dom";
+import {ProjectForm} from "../../components/ProjectForm";
+import {setCreatedProjects} from "../../store/user/actions";
 
 const {TabPane} = Tabs;
 
 const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
-  const [formUser, setUser] = useState(user)
   const [form] = Form.useForm();
   return (
     <Modal
@@ -37,9 +39,9 @@ const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
         layout="vertical"
         name="update_form"
         initialValues={{
-            fullName: formUser.fullName,
-            info: formUser.info,
-            birthDate : moment(formUser.birthDate, 'YYYY/MM/DD')
+            fullName: user.fullName,
+            info: user.info,
+            birthDate : moment(user.birthDate, 'YYYY/MM/DD')
         }}
       >
         <Form.Item
@@ -65,7 +67,6 @@ const UpdateProfileForm = ({ visible, onUpdate, onCancel, user }) => {
 
 const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
   const [form] = Form.useForm()
-  const [project, setProjects] = useState(projects)
   console.log(projects)
   return (
     <Modal 
@@ -95,32 +96,60 @@ const AssignToProjectModal = ({visible, onCreate, onCancel, projects}) => {
   ) 
 }
 
+const AddProjectModal = ({onCreate, onCancel, visible}) => {
+    const [form] = Form.useForm()
+    
+    return (
+        <Modal
+            visible = {visible}
+            okText = 'Create'
+            onCancel = {onCancel}
+            onOk = {() => {
+                form.validateFields()
+                    .then(values => {
+                        onCreate(values)
+                    })
+            }}
+            
+        >
+            <ProjectForm 
+                initialValues={{
+                    name: '',
+                    description: ''
+                }} 
+                form = {form}
+            /> 
+        </Modal>
+    )
+}
+
 export const Profile = (props) => {
     const {
-            user, authenticated, setUser, userProjects, userEnrolledProjects, token,
-            setUserProjects, setUserEnrolledProjects,
-            profileUser, profileCreatedProjects, profileEnrolledProjects,
-            setProfileEnrolledProjects, setProfileCreatedProjects, 
-            setProfileUser
+            user, authenticated, setUser, token,
         } = props
     
     const [editModalVisible, setEditModalVisible] = useState(false)
     const [addModalVisible, setAddModalVisible] = useState(false)
+    const [addProjectModalVisible, setAddProjectModalVisible] = useState(false)
+    
+    const [userCreatedProjects, setUserCreatedProjects] = useState([])
+    
+    const [profileUser, setProfileUser] = useState({})
     const [profileUserLoading, setProfileUserLoading] = useState(true)
+    const [profileCreatedProjects, setProfileCreatedProjects] = useState([])
     const [createdProjectsLoading, setCreatedProjectsLoading] = useState(true)
+    const [profileEnrolledProjects, setProfileEnrolledProjects] = useState([])
     const [enrolledProjectsLoading, setEnrolledProjectsLoading] = useState(true)
     
     useEffect(() => {   
         const targetUserId = props.match.params.id
         
-        const myProfile = authenticated && targetUserId === user.id 
+        const myProfile = authenticated && user && targetUserId === user.id 
         
         console.log('My profile: ', myProfile)
         console.log('Authenticated: ', authenticated)
-        console.log('My projects', userProjects)
-        console.log('My enrolled projects', userEnrolledProjects)
         
-        if (authenticated) {
+        if (authenticated && user) {
             HttpProvider.auth(router.user.one(targetUserId), token)
                 .then((profile) => {
                     setProfileUser(profile)
@@ -129,19 +158,17 @@ export const Profile = (props) => {
 
             HttpProvider.auth(router.user.createdProjects(targetUserId), token)
                 .then((projects) => {
-                    if (myProfile){
-                        setUserProjects(projects)
-                    }
                     setProfileCreatedProjects(projects)
                     setCreatedProjectsLoading(false)
                 })
             HttpProvider.auth(router.user.enrolledProjects(targetUserId), token)
                 .then((projects) => {
-                    if (myProfile){
-                        setUserEnrolledProjects(projects)
-                    }
                     setProfileEnrolledProjects(projects)
                     setEnrolledProjectsLoading(false)
+                })
+            HttpProvider.auth(router.user.createdProjects(user.id), token)
+                .then((projects) => {
+                    setUserCreatedProjects(projects)
                 })
         } else {
             HttpProvider.get(router.user.one(props.match.params.id))
@@ -161,13 +188,13 @@ export const Profile = (props) => {
                 })
         }
 
-    }, []) 
+    }, [user, token]) 
+    
 
     const onUpdateHandle = (userId, payload) => {
         HttpProvider.auth_put(router.user.one(userId), payload, token)
             .then(() => {
                 HttpProvider.auth(router.user.one(userId), token).then((responseUser) => {
-                    debugger
                     setProfileUser(responseUser)
                     if (userId === user.id){
                         setUser(responseUser)
@@ -179,7 +206,7 @@ export const Profile = (props) => {
     const assignUserToProjects = (links) => {
         for (let id in links){
             if (links[id]){
-                HttpProvider.auth_post(router.project.addUser(id, user.id), {}, token)
+                HttpProvider.auth_post(router.project.addUser(id, profileUser.id), {}, token)
             }
         }
         
@@ -190,9 +217,22 @@ export const Profile = (props) => {
                 setEnrolledProjectsLoading(false)
             })
     }
+    
+    const addProject = (payload) => {
+        HttpProvider.auth_post(router.project.create(), payload, token)
+            .then(res => {
+                if (res.id) {
+                    HttpProvider.auth(router.project.one(res.id), token)
+                        .then(project => {
+                            setCreatedProjects(prev => prev.concat([project]))
+                            setProfileCreatedProjects(prev => prev.concat([project]))
+                        })
+                }
+            })
+    }
 
-
-    const myProfile = authenticated && user.id === parseInt(props.match.params.id)
+    
+    const myProfile = authenticated && user && user.id === parseInt(props.match.params.id)
     
     return (
         <>
@@ -202,7 +242,7 @@ export const Profile = (props) => {
                         <div className = 'user-info-wrapper'>
                             <div className='user-control'>
                                 <Avatar size = {82} className = 'user-avatar' src = 'https://picsum.photos/200/200?blur' />
-                                {myProfile &&
+                                {(myProfile || user && user.isAdmin )&&
                                 <>
                                     <Button 
                                         type = 'dashed'
@@ -225,17 +265,20 @@ export const Profile = (props) => {
                             <div className = 'info'>
                                 <div className = 'user-full-name'>{profileUser.fullName}</div>
                                 <span>BIO</span>
-                                <div className = 'user-bio'>{profileUser.info ? user.info : 'Empty'}</div>
+                                <div className = 'user-bio'>{profileUser.info ? profileUser.info : 'Empty'}</div>
                             </div>
                         </div>
-                        { authenticated && !myProfile &&
+                        { authenticated && !myProfile && 
                         <div>
                             <Button type = 'primary' onClick = {() => setAddModalVisible(true)}>Add to project</Button>
                             <AssignToProjectModal
                                 visible = {addModalVisible}
-                                onCreate = {assignUserToProjects}
+                                onCreate = {(payload) => {
+                                    assignUserToProjects(payload)
+                                    setAddModalVisible(false)
+                                }}
                                 onCancel = {() => setAddModalVisible(false)}
-                                projects = {userProjects.filter(p => !profileEnrolledProjects.some(pe => pe.id === p.id))}
+                                projects = {userCreatedProjects.filter(p => !profileEnrolledProjects.some(pe => pe.id === p.id))}
                             />
                         </div>
                         }
@@ -246,7 +289,20 @@ export const Profile = (props) => {
                 <TabPane tab = "Created projects" key = "1">
                     {createdProjectsLoading ? <Spin /> :
                         <ul>
-                            {profileCreatedProjects.map(project => <li key = {project.id}>{project.name}</li>)}
+                            {profileCreatedProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)}
+                            {myProfile &&
+                                <>
+                                    <Button type = 'primary' onClick = {() => setAddProjectModalVisible(true)}>Create Project</Button>
+                                    <AddProjectModal 
+                                        visible = {addProjectModalVisible}
+                                        onCancel = {() => setAddProjectModalVisible(false)}
+                                        onCreate = {(payload) => {
+                                            addProject(payload) 
+                                            setAddProjectModalVisible(false)
+                                        }}
+                                    />
+                                </>
+                            }
                         </ul>
                     }
                 </TabPane>
@@ -254,7 +310,7 @@ export const Profile = (props) => {
                 <TabPane tab = "Enrolled projects" key = "2">
                     {enrolledProjectsLoading ? <Spin /> :
                         <ul>
-                            {profileEnrolledProjects.map(project => <li key = {project.id}>{project.name}</li>)}
+                            {profileEnrolledProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)}
                         </ul>
                     }
                 </TabPane>

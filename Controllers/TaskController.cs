@@ -97,7 +97,7 @@ namespace project_managment.Controllers
                         }
                     }
                     
-                    return Created($"/api/tasks/{id}", await _taskRepository.FindById(id));
+                    return Created($"/api/tasks/{id}", new {id = id});
                 default:
                     throw ProjectException.AccessDenied();
             }
