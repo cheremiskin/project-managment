@@ -23,7 +23,7 @@ namespace project_managment.Forms
         
         [Required]
         [StringLength(128)]
-        [RegularExpression("^[A-Z][a-zA-Z]{3,}(?: [A-Z][a-zA-Z]*){0,2}$")]
+        [RegularExpression("^[A-Z][a-zA-Z]{1,}(?: [A-Z][a-zA-Z]*){0,2}$")]
         [JsonPropertyName("fullName")]
         public string FullName { get; set; }
         [JsonPropertyName("birthDate")]

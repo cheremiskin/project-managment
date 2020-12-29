@@ -172,6 +172,13 @@ export const Task = (props) => {
                 if (res.id){
                    loadComment(res.id, token, (comment) => {
                        setComments(prevComments => prevComments.concat([comment]))
+                       setUserComments(prev => {
+                           if (user.id in prev)
+                               return prev
+                           const copy = {...prev}
+                           copy[user.id] = user;
+                           return copy
+                       })
                    }) 
                 }
             })
@@ -182,6 +189,8 @@ export const Task = (props) => {
         HttpProvider.auth_put(router.task.one(task.id), payload, token)
             .then(() => {task.statusId = status.key})
     }
+    
+    debugger
     
     if (!tokenChecked)
         return <Spin />
@@ -280,11 +289,11 @@ export const Task = (props) => {
 }
 
 const mapStateToProps = (state) => {
-    debugger
     return {
         token: state.user.token,
         user: state.user.user, 
-        authenticated: state.user.token !== null
+        authenticated: state.user.token !== null && state.user.tokenChecked,
+        tokenChecked: state.user.tokenChecked
     }
 }
 

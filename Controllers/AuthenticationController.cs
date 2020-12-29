@@ -32,7 +32,7 @@ namespace project_managment.Controllers
         {
             ClaimsIdentity claimsIdentity = await GetIdentity(form.Email, form.Password);
             if (claimsIdentity == null)
-                return BadRequest(new {error_text = "Invalid email or password"});
+                return BadRequest(new {code = "authentication_failed", message = "Invalid email or password"});
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                     issuer: AuthenticationOptions.Issuer,
