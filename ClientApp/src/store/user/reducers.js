@@ -1,8 +1,10 @@
-import {USER_SET_ENROLLED_PROJECTS, USER_SET_CREATED_PROJECTS, USER_SET_TOKEN, USER_SET_USER} from './actions'
+import {USER_SET_TOKEN_CHECKED,USER_SET_ENROLLED_PROJECTS, USER_SET_CREATED_PROJECTS, USER_SET_TOKEN, USER_SET_USER} from './actions'
+
 
 const defaultState = {
     user: null,
     token: null,
+    tokenChecked: false,
     createdProjects: null,
     enrolledProjects: null,
 }
@@ -13,6 +15,8 @@ export const userReducer = (state = defaultState, action) => {
             return {...state, user: action.payload}
         case USER_SET_TOKEN:
             return {...state, token: action.payload}
+        case USER_SET_TOKEN_CHECKED:
+            return {...state, tokenChecked: action.payload}
         case USER_SET_CREATED_PROJECTS:
             return {...state, createdProjects: action.payload}
         case USER_SET_ENROLLED_PROJECTS:

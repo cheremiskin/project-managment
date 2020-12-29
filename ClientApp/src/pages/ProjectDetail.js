@@ -43,35 +43,42 @@ const EditProjectModal = ({onEdit, onCancel, visible, project}) => {
 
 export const ProjectDetail = (props) => {
 
-    const {token, authenticated, user} = props
+    const {token, authenticated, user, tokenChecked} = props
     
     
     const [editModalVisible, setEditModalVisible]  = useState(false)
     const [project, setProject] = useState(null);
     const [creator, setCreator] = useState(null)
-    const [users, setUsers] = useState(null)
+    const [users, setUsers] = useState([])
 
     useEffect(() => {
+        if (!tokenChecked)
+            return 
+        
         if (authenticated){
             HttpProvider.auth(router.project.one(props.match.params.id), token).then(res => {
                 setProject(res);
                 HttpProvider.auth(router.user.one(res.creatorId), token).then(setCreator)
+                
+                HttpProvider.auth(router.project.users(props.match.params.id), token).then(res => {
+                    setUsers(res)
+                })
             });
             
-            HttpProvider.auth(router.project.users(props.match.params.id), token).then(res => {
-                setUsers(res)
-            })
         }
         else {
             HttpProvider.get(router.project.one(props.match.params.id)).then(project => {
                 setProject(project)
                 HttpProvider.get(router.user.one(project.creatorId)).then(setCreator)
             })
-            HttpProvider.get(router.project.one(props.match.params.id)).then(setUsers)
+            HttpProvider.get(router.project.users(props.match.params.id)).then((user) => {
+                debugger
+                setUsers(user)
+            })
         }
         
         
-    }, []);
+    }, [tokenChecked]);
     
     const editProject = (payload) => {
         HttpProvider.auth_put(router.project.one(props.match.params.id), payload, token)
@@ -82,9 +89,10 @@ export const ProjectDetail = (props) => {
     }
 
     
-    if (!project) return <Spin />
+    if (!project || !tokenChecked || !users) return <Spin />
     
     const canEdit = authenticated && user && (user.isAdmin || user.id === project.creatorId)
+    
     debugger
     
     return (
@@ -116,10 +124,8 @@ export const ProjectDetail = (props) => {
                     >
                         <Panel key={'1'} header = 'Assigned users'>
                             {users.map(user =>
-
-                                <Link tag = {Link} to = {`/user/${user.id}`}>
+                                <Link key = {user.id} tag = {Link} to = {`/user/${user.id}`}>
                                     <UserView
-                                        key = {user.id}
                                         user = {user}
                                         withFullName
                                     />
@@ -143,7 +149,8 @@ const mapStateToProps = (state) => {
     return {
         token: state.user.token,
         user: state.user.user,
-        authenticated: state.user.token !== null
+        authenticated: state.user.token !== null && state.user.tokenChecked,
+        tokenChecked: state.user.tokenChecked
     }
 }
 
