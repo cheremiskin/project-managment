@@ -3,6 +3,7 @@ import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLi
 import { Link } from 'react-router-dom';
 import {connect} from 'react-redux'
 import '../assets/styles/components/NavMenu.css';
+import LogOut from './smart/LogOut';
 
 export class NavMenu extends Component {
   static displayName = NavMenu.name;
@@ -44,6 +45,9 @@ export class NavMenu extends Component {
                   <NavItem>
                     <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile {this.props.user.isAdmin && '(Admin)'}</NavLink>
                   </NavItem>
+                }
+                {this.props.authenticated && this.props.user &&
+                  <LogOut />
                 }
               </ul>
             </Collapse>
