@@ -3,7 +3,7 @@ import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
 import {connect} from 'react-redux';
 import HttpProvider from '../HttpProvider';
 
-import {setUser, setEnrolledProjects, setToken, setCreatedProjects} from "../store/user/actions";
+import {setUser, setEnrolledProjects, setToken, setCreatedProjects, setTokenChecked} from "../store/user/actions";
 import {router} from "../router";
 
 const layout = {
@@ -72,7 +72,7 @@ const SignInForm = (props) => {
 }
 
 const mapDispatchToProps = {
-   setToken, setCreatedProjects, setEnrolledProjects, setUser 
+   setToken, setCreatedProjects, setEnrolledProjects, setUser, setTokenChecked
 }
 
 export default connect(() => ({}), mapDispatchToProps)(SignInForm);

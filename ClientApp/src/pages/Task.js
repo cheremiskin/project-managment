@@ -95,7 +95,7 @@ const EditTaskModal = ({task, onEdit, onCancel, visible, assignedUsers, allUsers
 
 export const Task = (props) => {
     
-    const {token, user, setUser, authenticated} = props
+    const {token, user, setUser, authenticated, tokenChecked} = props
     
     const [task, setTask] = useState({})
     const [taskLoading, setTaskLoading] = useState(true)
@@ -117,52 +117,55 @@ export const Task = (props) => {
     const [taskCreator, setTaskCreator] = useState({})
     
     useEffect(() => {  
-        loadTask(props.match.params.id, token, (result) => {
-            loadProject(result.projectId, token, (proj) => {
-                loadUser(proj.creatorId, token, (projectCreator) => {
-                    setCreator(projectCreator)
+        if (!tokenChecked)
+            return
+        
+        if (authenticated){
+            loadTask(props.match.params.id, token, (result) => {
+                loadProject(result.projectId, token, (proj) => {
+                    loadUser(proj.creatorId, token, (projectCreator) => {
+                        setCreator(projectCreator)
+                    })
+                    setProject(proj)
                 })
-                setProject(proj)
-            })
-            loadUsersInProject(result.projectId, token, setUsersInProject)
-            loadUser(result.creatorId, token, setTaskCreator)
-            setTask(result)
-            setTaskLoading(false)
-       } ) 
-    }, [])
-    
-    useEffect(() => {
-        HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
+                loadUsersInProject(result.projectId, token, setUsersInProject)
+                loadUser(result.creatorId, token, setTaskCreator)
+                setTask(result)
+                setTaskLoading(false)
+            } )
+
+
+            HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
                 setUsers(users)
                 setUsersLoading(false)
             })
-    }, [])
-    
-    useEffect(() => {
+
+
+            HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
+                .then(res => {
+                    let userIds = new Set(res.map(c => c.userId))
+
+                    userIds.forEach((userId) => {
+                        loadUser(userId, token, (user) => {
+                            setUserComments(prev => {
+                                let copy = {...prev}
+                                copy[userId] = user
+                                return copy
+                            })
+                        })
+                    })
+
+                    setComments(res)
+                })
+        } else {
+            
+        }
+        
         HttpProvider.get(router.task.statuses()).then((result) => {
             setStatuses(result)
         })
-    }, [])
-    
-    useEffect(() => {
-        HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
-            .then(res => { 
-                let userIds = new Set(res.map(c => c.userId))
-                
-                userIds.forEach((userId) => {
-                    loadUser(userId, token, (user) => {
-                        setUserComments(prev => {
-                            let copy = {...prev}
-                            copy[userId] = user
-                            return copy
-                        })
-                    })
-                })
-                
-                setComments(res)
-            })
-    }, [])
-    
+    }, [tokenChecked])
+
     const uploadComment = (comment) => {
         HttpProvider.auth_post(router.comment.list({taskId: props.match.params.id}),comment, token)
             .then( res => {
@@ -179,6 +182,9 @@ export const Task = (props) => {
         HttpProvider.auth_put(router.task.one(task.id), payload, token)
             .then(() => {task.statusId = status.key})
     }
+    
+    if (!tokenChecked)
+        return <Spin />
     
     return (
         <>
