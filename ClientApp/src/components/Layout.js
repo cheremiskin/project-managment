@@ -18,6 +18,7 @@ class Layout extends Component {
       }
 
       if (token !== null) {
+
         console.log("token ->", token);
         this.props.setToken(token)
         
@@ -31,7 +32,6 @@ class Layout extends Component {
         this.props.setTokenChecked(true)
       }
     }
-
   }
 
   render () {

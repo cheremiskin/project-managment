@@ -8,6 +8,7 @@ import '../../assets/styles/pages/User.css'
 import {Link} from "react-router-dom";
 import {ProjectForm} from "../../components/ProjectForm";
 import {setCreatedProjects} from "../../store/user/actions";
+import { ProjectList } from '../../components/smart/projects/ProjectList';
 
 const {TabPane} = Tabs;
 
@@ -293,7 +294,6 @@ export const Profile = (props) => {
                 <TabPane tab = "Created projects" key = "1">
                     {createdProjectsLoading ? <Spin /> :
                         <ul>
-                            {profileCreatedProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)}
                             {myProfile &&
                                 <>
                                     <Button type = 'primary' onClick = {() => setAddProjectModalVisible(true)}>Create Project</Button>
@@ -307,6 +307,9 @@ export const Profile = (props) => {
                                     />
                                 </>
                             }
+                            <ProjectList projects={profileCreatedProjects}  />
+                            {/* {profileCreatedProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)} */}
+                            
                         </ul>
                     }
                 </TabPane>
@@ -314,7 +317,8 @@ export const Profile = (props) => {
                 <TabPane tab = "Enrolled projects" key = "2">
                     {enrolledProjectsLoading ? <Spin /> :
                         <ul>
-                            {profileEnrolledProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)}
+                            <ProjectList projects={profileEnrolledProjects}  />
+                            {/* {profileEnrolledProjects.map(project => <li key = {project.id}><Link to = {`/project/${project.id}`}> {project.name} </Link></li>)} */}
                         </ul>
                     }
                 </TabPane>

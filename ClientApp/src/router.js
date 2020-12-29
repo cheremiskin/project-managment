@@ -11,6 +11,7 @@ const addParams = (url, params = {}) => {
 export const router = {
     project: {
         list: (params = {}) => addParams(`/api/projects`, params),
+        many: (page, size) => addParams(`/api/projects?`, {page : page, size: size}),
         one: (id) => `/api/projects/${id}`,
         users: (id) => `/api/projects/${id}/users`,
         addUser: (projectId, userId) => addParams(`/api/projects/${projectId}/users?`, {userId: userId}),

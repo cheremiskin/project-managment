@@ -3,7 +3,7 @@ import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
 import {connect} from 'react-redux';
 import HttpProvider from '../HttpProvider';
 
-import {setUser, setEnrolledProjects, setToken, setCreatedProjects, setTokenChecked} from "../store/user/actions";
+import {setUser, setEnrolledProjects, setToken, setTokenChecked, setCreatedProjects} from "../store/user/actions";
 import {router} from "../router";
 
 const layout = {
