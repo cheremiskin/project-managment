@@ -72,7 +72,6 @@ export const ProjectDetail = (props) => {
                 HttpProvider.get(router.user.one(project.creatorId)).then(setCreator)
             })
             HttpProvider.get(router.project.users(props.match.params.id)).then((user) => {
-                debugger
                 setUsers(user)
             })
         }
@@ -93,7 +92,6 @@ export const ProjectDetail = (props) => {
     
     const canEdit = authenticated && user && (user.isAdmin || user.id === project.creatorId)
     
-    debugger
     
     return (
         <>

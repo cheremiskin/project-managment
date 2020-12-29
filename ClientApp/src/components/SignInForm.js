@@ -19,6 +19,8 @@ const SignInForm = (props) => {
     HttpProvider.post('api/token/', values)
     .then (
         (res) => {
+          if(!res.error_text) {
+            window.location.assign('/projects')
             props.setToken(`Bearer ${res.access_token}`);
             
             HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
@@ -27,7 +29,7 @@ const SignInForm = (props) => {
                     props.setTokenChecked(true)
                 }
             )
-            
+          }
         }
     )
   };
