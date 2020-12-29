@@ -49,12 +49,13 @@ export const ProjectDetail = (props) => {
     const [project, setProject] = useState(null);
     const [creator, setCreator] = useState(null)
     const [users, setUsers] = useState([])
+    
+    const [projectIsAccessible, setProjectIsAccessible] = useState(true)
 
     useEffect(() => {
         if (!tokenChecked)
             return 
         
-        debugger
         if (authenticated){
             HttpProvider.auth(router.project.one(props.match.params.id), token)
                 .then(res => {
@@ -65,6 +66,10 @@ export const ProjectDetail = (props) => {
                         .then(res => {
                         setUsers(res)
                     })
+            }).catch((error) => {
+                debugger
+                console.log(error)
+               setProjectIsAccessible(false) 
             });
             
         }
@@ -77,11 +82,19 @@ export const ProjectDetail = (props) => {
                         .then((user) => {
                         setUsers(user)
                     })
+            }).catch((error) => {
+                debugger
+                console.log(error)
+                setProjectIsAccessible(false)
             })
         }
         
         
     }, [tokenChecked]);
+    
+    if (!projectIsAccessible)
+        return <h1>Oops, something went wrong</h1>
+    
     
     const editProject = (payload) => {
         HttpProvider.auth_put(router.project.one(props.match.params.id), payload, token)

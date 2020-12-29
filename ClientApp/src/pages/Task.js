@@ -14,6 +14,7 @@ import {TaskComment} from "../components/dumb/task/Comment";
 import {CreateCommentForm} from "../components/CreateCommentForm";
 import {CreateTaskForm} from "../components/CreateTaskForm";
 import {setUser} from "../store/user/actions";
+import openNotification from "../openNotification";
 
 const {Option} = Select
 const {Panel} = Collapse
@@ -116,46 +117,55 @@ export const Task = (props) => {
     
     const [taskCreator, setTaskCreator] = useState({})
     
+    const [taskIsAccessible, setTaskIsAccessible] = useState(true)
+    
     useEffect(() => {  
         if (!tokenChecked)
             return
         
         if (authenticated){
-            loadTask(props.match.params.id, token, (result) => {
-                loadProject(result.projectId, token, (proj) => {
-                    loadUser(proj.creatorId, token, (projectCreator) => {
-                        setCreator(projectCreator)
-                    })
-                    setProject(proj)
-                })
-                loadUsersInProject(result.projectId, token, setUsersInProject)
-                loadUser(result.creatorId, token, setTaskCreator)
-                setTask(result)
-                setTaskLoading(false)
-            } )
-
-
-            HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => {
-                debugger
-                setUsers(users)
-                setUsersLoading(false)
-            })
-
-            HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
-                .then(res => {
-                    let userIds = new Set(res.map(c => c.userId))
-
-                    userIds.forEach((userId) => {
-                        loadUser(userId, token, (user) => {
-                            setUserComments(prev => {
-                                let copy = {...prev}
-                                copy[userId] = user
-                                return copy
-                            })
+            HttpProvider.auth(router.task.one(props.match.params.id), token) // loading tas
+                .then(task => {
+                    HttpProvider.auth(router.project.one(task.projectId), token) // loading project task belongs to 
+                        .then(proj => {
+                            HttpProvider.auth(router.user.one(proj.creatorId), token).then(setCreator) // loadin creator of project
+                            setProject(proj)
                         })
+                    HttpProvider.auth(router.project.users(task.projectId), token) // loading members of projec
+                        .then(setUsersInProject)
+                    HttpProvider.auth(router.user.one(task.creatorId), token) // loading creator of task
+                        .then(setTaskCreator)
+                    
+                    setTask(task)
+                    setTaskLoading(false)
+                    
+                    HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => { // loading assingees
+                        debugger
+                        setUsers(users)
+                        setUsersLoading(false)
                     })
+                    
+                    HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token) // loading comments
+                        .then(res => {
+                            let userIds = new Set(res.map(c => c.userId))
 
-                    setComments(res)
+                            userIds.forEach((userId) => {
+                                loadUser(userId, token, (user) => {
+                                    setUserComments(prev => {
+                                        let copy = {...prev}
+                                        copy[userId] = user
+                                        return copy
+                                    })
+                                })
+                            })
+
+                            setComments(res)
+                        })
+                    
+                })
+                .catch(error => {
+                    console.log(error)
+                    setTaskIsAccessible(false)
                 })
         } else {
             HttpProvider.get(router.task.one(props.match.params.id))
@@ -195,6 +205,9 @@ export const Task = (props) => {
 
                             setComments(res)
                         })
+                }).catch(error => {
+                    console.log(error)    
+                    setTaskIsAccessible(false) 
                 })
         }
         
@@ -203,6 +216,9 @@ export const Task = (props) => {
         })
     }, [tokenChecked])
 
+    if (!taskIsAccessible)
+        return <h1>Ooops, something went wrong</h1>
+    
     const uploadComment = (comment) => {
         HttpProvider.auth_post(router.comment.list({taskId: props.match.params.id}),comment, token)
             .then( res => {

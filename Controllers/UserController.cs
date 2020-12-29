@@ -139,7 +139,13 @@ namespace project_managment.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetEnrolledProjects([FromRoute(Name = "id")] long id)
         {
-            var enrolledProjects = await _projectRepository.FindProjectsUserEnrolledIn(id, true);
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Ok(await _projectRepository.FindProjectsUserEnrolledIn(id));
+            }
+            
+            var role = GetClientRoleClaim()?.Value;
+            var enrolledProjects = await _projectRepository.FindProjectsUserEnrolledIn(id, role == Role.RoleAdmin ||  id == GetClientId());
             enrolledProjects.Where(project =>
             {
                 var members = _userRepository.FindAllUsersInProject(project.Id).Result;

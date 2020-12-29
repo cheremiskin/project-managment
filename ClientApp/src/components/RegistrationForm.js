@@ -1,24 +1,31 @@
 import React from 'react';
 import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
+import HttpProvider from "../HttpProvider";
+import {router} from "../router";
+import openNotification from "../openNotification";
 
 const layout = {
   labelCol: { span: 8 },
-  wrapperCol: { span: 16 },
+  wrapperCol: { span: 8 },
 };
 const tailLayout = {
-  wrapperCol: { offset: 8, span: 16 },
+  wrapperCol: { offset: 8, span: 8 },
 };
 
 const RegistrationForm = (props) => {
+  
+  const [form] = Form.useForm()
+    
   const onFinish = values => {
-    console.log('Success:', values);
-    fetch('api/users/',{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8'
-      },
-      body: JSON.stringify(values)
-    });
+    HttpProvider.post('api/users/', values)
+        .then(() => { 
+            form.resetFields()
+          props.onRegistrationSuccess()
+          openNotification('Registration went successfully', '')
+        })
+        .catch(error => {
+          openNotification('Registration failed', 'Check data')
+        })
   };
 
   const onFinishFailed = errorInfo => {
@@ -32,6 +39,7 @@ const RegistrationForm = (props) => {
       initialValues={{ remember: true }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
+      form = {form}
     >
       <Form.Item
         label="Email"
@@ -52,7 +60,6 @@ const RegistrationForm = (props) => {
       <Form.Item
         label="Info"
         name="Info"
-        // rules={[{ required: true, message: 'Please input your full name!' }]}
       >
         <Input.TextArea />
       </Form.Item>
@@ -60,7 +67,6 @@ const RegistrationForm = (props) => {
       <Form.Item
         label="BirthDate"
         name="BirthDate"
-        // rules={[{ required: true, message: 'Please input your full name!' }]}
       >
         <DatePicker />  
       </Form.Item>

@@ -4,32 +4,29 @@ import RegistrationForm from '../components/RegistrationForm';
 import SignInForm from '../components/SignInForm';
 import { connect } from 'react-redux';
 import {Link} from "react-router-dom";
-import {Projects} from "./Projects";
+import {useState} from 'react'
 
-class Home extends Component {
-  static displayName = Home.name;
-
-  render () {
-    console.log('state: ', this.props);
+const Auth = (props) =>  {
+    
+    const [activeKey, setActiveKey] = useState("1")
+     
     return (
       <div>
-        {this.props.authenticated ? <Projects /> :
-          <Tabs defaultActiveKey="1">
+          <Tabs 
+              activeKey ={activeKey} 
+              onChange = {(value) => {
+                  setActiveKey(value)
+              }}
+            >
             <Tabs.TabPane tab="Sign In" key="1">
-              {
-                this.props.user && <Link to = {`/user/${this.props.user.id}`}>{this.props.user.fullName}</Link>
-              }
               <SignInForm />
             </Tabs.TabPane>
             <Tabs.TabPane tab="Registration" key="2">
-              <RegistrationForm />  
+              <RegistrationForm onRegistrationSuccess = {() => setActiveKey("1")} />  
             </Tabs.TabPane>
           </Tabs>
-        }
-        
       </div>
     );
-  }
 }
 
 const mapStateToProps = (state) => {
@@ -40,4 +37,4 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(Home)
+export default connect(mapStateToProps)(Auth)

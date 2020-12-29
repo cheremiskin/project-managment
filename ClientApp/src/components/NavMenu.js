@@ -33,21 +33,23 @@ export class NavMenu extends Component {
             <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
               <ul className="navbar-nav flex-grow">
                 <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
-                </NavItem>
-                <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/users">Users</NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink tag={Link} className="text-dark" to="/projects">Projects</NavLink>
                 </NavItem>
                 {this.props.authenticated && this.props.user &&
-                  <NavItem>
-                    <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile {this.props.user.isAdmin && '(Admin)'}</NavLink>
-                  </NavItem>
+                    <>
+                      <NavItem>
+                        <NavLink tag={Link} className="text-dark" to={`/user/${this.props.user.id}`}>Profile {this.props.user.isAdmin && '(Admin)'}</NavLink>
+                      </NavItem>
+                      <LogOut />
+                    </>
                 }
-                {this.props.authenticated && this.props.user &&
-                  <LogOut />
+                {!this.props.authenticated &&
+                <NavItem>
+                  <NavLink tag={Link} className="text-dark" to="/auth">Auth</NavLink>
+                </NavItem>
                 }
               </ul>
             </Collapse>
@@ -60,7 +62,7 @@ export class NavMenu extends Component {
 
 const mapStateToProps = (state) => {  
   return {
-    authenticated: state.user.token !== null,
+    authenticated: state.user.token !== null && state.user.tokenChecked,
     user: state.user.user
   }
 }

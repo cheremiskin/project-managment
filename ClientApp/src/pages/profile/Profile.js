@@ -141,6 +141,8 @@ export const Profile = (props) => {
     const [createdProjectsLoading, setCreatedProjectsLoading] = useState(true)
     const [profileEnrolledProjects, setProfileEnrolledProjects] = useState([])
     const [enrolledProjectsLoading, setEnrolledProjectsLoading] = useState(true)
+
+    const [profileIsAccessible, setProfileIsAccessible] = useState(true)
     
     useEffect(() => {   
         if (!tokenChecked){
@@ -155,43 +157,52 @@ export const Profile = (props) => {
         if (authenticated && user) {
             HttpProvider.auth(router.user.one(targetUserId), token)
                 .then((profile) => {
+                    HttpProvider.auth(router.user.createdProjects(targetUserId), token)
+                        .then((projects) => {
+                            setProfileCreatedProjects(projects)
+                            setCreatedProjectsLoading(false)
+                        })
+                    HttpProvider.auth(router.user.enrolledProjects(targetUserId), token)
+                        .then((projects) => {
+                            setProfileEnrolledProjects(projects)
+                            setEnrolledProjectsLoading(false)
+                        })
+                    HttpProvider.auth(router.user.createdProjects(user.id), token)
+                        .then((projects) => {
+                            setUserCreatedProjects(projects)
+                        })
                     setProfileUser(profile)
                     setProfileUserLoading(false)
+                }).catch(error => {
+                    console.log(error)
+                    setProfileIsAccessible(false) 
                 })
 
-            HttpProvider.auth(router.user.createdProjects(targetUserId), token)
-                .then((projects) => {
-                    setProfileCreatedProjects(projects)
-                    setCreatedProjectsLoading(false)
-                })
-            HttpProvider.auth(router.user.enrolledProjects(targetUserId), token)
-                .then((projects) => {
-                    setProfileEnrolledProjects(projects)
-                    setEnrolledProjectsLoading(false)
-                })
-            HttpProvider.auth(router.user.createdProjects(user.id), token)
-                .then((projects) => {
-                    setUserCreatedProjects(projects)
-                })
         } else {
             HttpProvider.get(router.user.one(props.match.params.id))
                 .then((profile) => {
                     setProfileUser(profile)
                     setProfileUserLoading(false)
-                })
-            HttpProvider.get(router.user.createdProjects(targetUserId))
-                .then((projects) => {
-                    setProfileCreatedProjects(projects)
-                    setCreatedProjectsLoading(false)
-                })
-            HttpProvider.get(router.user.enrolledProjects(targetUserId))
-                .then((projects) => {
-                    setProfileEnrolledProjects(projects)
-                    setEnrolledProjectsLoading(false)
+                    HttpProvider.get(router.user.createdProjects(targetUserId))
+                        .then((projects) => {
+                            setProfileCreatedProjects(projects)
+                            setCreatedProjectsLoading(false)
+                        })
+                    HttpProvider.get(router.user.enrolledProjects(targetUserId))
+                        .then((projects) => {
+                            setProfileEnrolledProjects(projects)
+                            setEnrolledProjectsLoading(false)
+                        })
+                }).catch(error => {
+                    console.log(error)
+                    setProfileIsAccessible(false)
                 })
         }
 
     }, [tokenChecked]) 
+    
+    if (!profileIsAccessible)
+        return <h1>Oops, something went wrong</h1>
     
     const onUpdateHandle = (userId, payload) => {
         HttpProvider.auth_put(router.user.one(userId), payload, token)

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Input, Button, DatePicker, Checkbox } from 'antd';
+import { Form, Input, Button} from 'antd';
+import openNotification from "../openNotification";
 import {connect} from 'react-redux';
 import HttpProvider from '../HttpProvider';
 
@@ -8,37 +9,30 @@ import {router} from "../router";
 
 const layout = {
   labelCol: { span: 8 },
-  wrapperCol: { span: 16 },
+  wrapperCol: { span: 8 },
 };
 const tailLayout = {
-  wrapperCol: { offset: 8, span: 16 },
+  wrapperCol: { offset: 8, span: 8 },
 };
+
 
 const SignInForm = (props) => {
   const onFinish = values => {
-    try{
-      HttpProvider.post('api/token/', values)
-          .then (
-              (res) => {
-                if(!res.error_text) {
-                  window.location.assign('/projects')
-                  props.setToken(`Bearer ${res.access_token}`);
+    HttpProvider.post('api/token/', values).then (
+            (res) => {
+                window.location.assign('/projects')
+                props.setToken(`Bearer ${res.access_token}`);
 
-                  HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
-                      (res) => {
-                        props.setUser(res);
-                        props.setTokenChecked(true)
-                      }
-                  )
-                }
-              }
-          ).catch((error) => {
-        alert('login failed')
-      })
-    } catch (error) {
-      alert(error)
-      console.log(error)
-    }
+                HttpProvider.auth('/api/users/me', 'Bearer ' + res.access_token).then (
+                    (res) => {
+                      props.setUser(res);
+                      props.setTokenChecked(true)
+                    }
+                )
+            }
+        ).catch((error) => {
+            openNotification('Login Failed', 'Something wrong')
+        })
   };
 
   const onFinishFailed = errorInfo => {

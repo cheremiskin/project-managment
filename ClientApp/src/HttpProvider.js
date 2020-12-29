@@ -6,16 +6,15 @@ class HttpProvider {
     static get(url, params = {}) {
         return fetch(`${API_ROOT}${url}`, params).then((response) => {
 
+            debugger
             if (!response.ok) {
-                const error = new Error(response.statusText);
-                console.error(error);
+                throw new Error(response.statusText);
             }
             
-            if (response.status === 204 || response.status === 401){
+            if (response.status === 204)
                 return {}
-            }
             
-            return response.json();
+            return response.json()
         })
     }
 
@@ -34,6 +33,7 @@ class HttpProvider {
             if (!response.ok) {
                 const error = new Error(response.statusText);
                 console.error("error: ", error);
+                throw error
             }
             
 
@@ -60,7 +60,6 @@ class HttpProvider {
     }
 
     static auth_post(url, data, token = '') {
-        console.log('POST WITH LINK', url)
         return this._send(url, 'POST', data, {'Authorization': token});
     }
 
