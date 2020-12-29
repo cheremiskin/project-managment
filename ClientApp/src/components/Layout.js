@@ -18,7 +18,6 @@ class Layout extends Component {
       }
 
       if (token !== null) {
-        console.log("token ->", token);
         HttpProvider.auth(router.user.me, token).then(
           (res) => {
             this.props.setUser(res); 
@@ -26,7 +25,6 @@ class Layout extends Component {
         )
       }
     }
-
   }
 
   render () {
