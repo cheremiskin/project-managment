@@ -147,7 +147,6 @@ export const Task = (props) => {
     useEffect(() => {
         HttpProvider.auth(router.comment.list({taskId : props.match.params.id}), token)
             .then(res => { 
-                debugger
                 let userIds = new Set(res.map(c => c.userId))
                 
                 userIds.forEach((userId) => {

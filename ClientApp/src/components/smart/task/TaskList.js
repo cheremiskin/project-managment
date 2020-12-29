@@ -108,9 +108,9 @@ export const TaskList = (props) => {
             })
     }
     
-    const filterByUser = (userId) => {
-        setChosenUser(userId) 
-    }
+    // const filterByUser = (userId) => {
+    //     setChosenUser(userId) 
+    // }
     
     const filterByStatus = (statusId) => {
         setChosenStatus(statusId)
@@ -125,7 +125,7 @@ export const TaskList = (props) => {
     useEffect(()=>{
         loadTasks(props.params.projectId, token, (tasks) => {
             setTasks(tasks)
-            setTaskList(tasks)
+            setTaskList(tasks.sort((t1, t2) => moment(t1.expirationDate).isAfter(moment(t2))))
         })
         
         HttpProvider.get(router.task.statuses()).then(setStatuses)
@@ -156,15 +156,15 @@ export const TaskList = (props) => {
                 />
 
                 <div className = 'filters-container'>
-                    <Select
-                        defaultValue={0}
-                        value = {chosenUser}
-                        onChange={value => setChosenUser(value)}
-                    >
-                        <Option key = {0} value = {0}>Member</Option>
-                        {usersInProject.map(user =>
-                            <Option key = {user.id} value = {user.id}>{user.fullName}</Option>)}
-                    </Select>
+                    {/*<Select*/}
+                    {/*    defaultValue={0}*/}
+                    {/*    value = {chosenUser}*/}
+                    {/*    onChange={value => setChosenUser(value)}*/}
+                    {/*>*/}
+                    {/*    <Option key = {0} value = {0}>Member</Option>*/}
+                    {/*    {usersInProject.map(user =>*/}
+                    {/*        <Option key = {user.id} value = {user.id}>{user.fullName}</Option>)}*/}
+                    {/*</Select>*/}
                     <Select
                         defaultValue = {0}
                         onChange={(payload) => {

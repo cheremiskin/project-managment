@@ -1,0 +1,18 @@
+﻿.project-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.project-header button {
+    margin-left: 2rem;
+}
+
+.project-header h1 {
+    margin: 0;
+}
+
+.user-list {
+    margin-bottom: 1rem;
+}

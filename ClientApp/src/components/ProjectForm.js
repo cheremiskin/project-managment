@@ -33,8 +33,10 @@ export const ProjectForm = ({initialValues, form}) => {
             </Form.Item>
             
             <Form.Item
-                name = 'isPrivate'>
-                <Checkbox >Make project private</Checkbox>
+                name = 'isPrivate'
+                valuePropName={'checked'}
+            >
+                <Checkbox>Make project private</Checkbox>
             </Form.Item>
 
 

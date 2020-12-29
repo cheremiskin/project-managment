@@ -30,7 +30,7 @@ namespace project_managment.Forms
             var task = new Task
             {
                 Title = this.Title,
-                StatusId = this.StatusId == 0 ? 1 : this.StatusId,
+                StatusId = this.StatusId == 0 ? 2 : this.StatusId,
                 Content = this.Content,
                 CreationDate = DateTime.Now,
                 ExpirationDate = this.ExpirationDate,

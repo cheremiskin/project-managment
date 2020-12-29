@@ -12,18 +12,17 @@ const {Paragraph} = Typography
 const TaskCard = (props) => {
     const {task, onMore, onDelete, status} = props
     
-    const styles = {}
+    let expired = false
     
-    if (moment(task.expirationDate).isAfter(new moment(new Date()))){
-       styles.background = 'red' 
+    if (moment(task.expirationDate).isBefore(new moment(new Date()))){
+        expired = true
     }
     
     return (
         <Card 
-            className = 'task-card'
+            className = {'task-card' + (expired ? ' task-red-bordered' : '')}
             title= {`${task.title}  (${status})`}
             actions = {[<Link tag = {Link} to= {`/task/${task.id}`}>More</Link>, <span onClick = {onDelete}>Delete</span>]}
-            style = {{styles}}
         >
             <div className = 'task-content'>
                 <Paragraph ellipsis={{ 
