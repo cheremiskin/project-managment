@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from 'antd';
+import moment from "moment";
 
 const ProjectCard = (props) => {
     console.log(props);
@@ -13,7 +14,7 @@ const ProjectCard = (props) => {
                 {props.description}    
             </div>
             <div className="project-card__date">
-                {props.createdAt}    
+                Created at {moment(props.createdAt).format('YYYY-MM-DD HH:mm')}    
             </div>
         </Card>
     )
