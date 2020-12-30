@@ -250,8 +250,6 @@ export const Profile = (props) => {
     
     const myProfile = authenticated && user && user.id === parseInt(props.match.params.id)
     
-    debugger
-    
     return (
         <>
             {

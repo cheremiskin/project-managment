@@ -31,7 +31,7 @@ export const Projects = (props) => {
     
     return (
         <>
-            <h1>Projects</h1>
+            <h2>Public Projects</h2>
             <ProjectList withLoadMore/>
         </>
     );

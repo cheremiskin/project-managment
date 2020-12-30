@@ -1,0 +1,13 @@
+.logout-button::after {
+    /* content: '';
+    position: absolute;
+    left: -15px;
+    top: calc(15%);
+    width: 1px;
+    height: 70%;
+    background-color: black; */
+}
+
+.logout-button {
+    margin-left: 20px;
+}

@@ -6,7 +6,6 @@ class HttpProvider {
     static get(url, params = {}) {
         return fetch(`${API_ROOT}${url}`, params).then((response) => {
 
-            debugger
             if (!response.ok) {
                 throw new Error(response.statusText);
             }

@@ -68,7 +68,6 @@ export const ProjectDetail = (props) => {
                         setUsers(res)
                     })
             }).catch((error) => {
-                debugger
                 console.log(error)
                setProjectIsAccessible(false) 
             });
@@ -84,7 +83,6 @@ export const ProjectDetail = (props) => {
                         setUsers(user)
                     })
             }).catch((error) => {
-                debugger
                 console.log(error)
                 setProjectIsAccessible(false)
             })
@@ -120,7 +118,6 @@ export const ProjectDetail = (props) => {
     
     const canEdit = authenticated && user && (user.isAdmin || user.id === project.creatorId)
     
-    debugger
     
     return (
         <>

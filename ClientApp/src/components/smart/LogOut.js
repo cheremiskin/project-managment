@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import {connect} from 'react-redux';
 import {setToken, setUser} from '../../store/user/actions';
+import '../../assets/styles/components/LogOut.css';
 
 const LogOut = (props) => {
 
@@ -15,7 +16,7 @@ const LogOut = (props) => {
     }
     
     return (
-        <Button onClick={logOut}>Log Out</Button>
+        <Button className="logout-button" onClick={logOut}>Log Out</Button>
     )
 }
 

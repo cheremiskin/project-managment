@@ -13,6 +13,7 @@ const pageSize = 3
 export const UserList = (props) => {
     const {token} = props
     
+    const [allLoad, setAllLoad] = useState(false);
     const [initLoading, setInitLoading] = useState(true)
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState([])
@@ -37,13 +38,18 @@ export const UserList = (props) => {
     const onLoadMore = () => {
         setLoading(true)
         loadData((data) => {
-            setData(prevData => prevData.concat(data))
-            setPage(prevPage => prevPage + 1)
-            setLoading(false)
+            if (data.length > 0) {
+                setData(prevData => prevData.concat(data))
+                setPage(prevPage => prevPage + 1)
+                setLoading(false)    
+            } else {
+                setAllLoad(true)
+            }
+            
         })
     }
     
-    const loadMore = !initLoading && !loading ? (
+    const loadMore = !initLoading && !loading && !allLoad ? (
         <div
             style={{
                 textAlign: 'center',
@@ -57,7 +63,8 @@ export const UserList = (props) => {
         ) : null;
 
     return (
-
+        <>
+        <h2>Users</h2>
         <List
             loading={initLoading}
             itemLayout="horizontal"
@@ -81,6 +88,7 @@ export const UserList = (props) => {
                 </List.Item>
             )}
         />
+        </>
     )
 }
 

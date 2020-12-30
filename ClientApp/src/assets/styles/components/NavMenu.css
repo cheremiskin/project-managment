@@ -4,6 +4,11 @@
   word-break: break-all;
 }
 
+.navbar-nav {
+  display: flex;
+  align-items: center;
+}
+
 html {
   font-size: 14px;
 }
