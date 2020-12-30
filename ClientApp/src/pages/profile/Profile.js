@@ -337,6 +337,7 @@ export const Profile = (props) => {
                     }
                 </TabPane>
             </Tabs>
+
         </>
     );
 }

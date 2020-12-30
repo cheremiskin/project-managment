@@ -1,6 +1,7 @@
 ﻿import React from 'react'
 import {Form, Input, TimePicker, DatePicker, Select} from "antd";
 import moment from 'moment'
+import SunEditor from 'suneditor-react';
 
 const {TextArea} = Input
 const {Option} = Select
@@ -24,7 +25,7 @@ export const CreateTaskForm = ({form, users, initialValues}) => {
                 <Input />
             </Form.Item>
             
-            <Form.Item 
+            {/* <Form.Item 
                 label = 'Content'
                 name = 'content'
                 rules = {[
@@ -36,6 +37,13 @@ export const CreateTaskForm = ({form, users, initialValues}) => {
                     showCount={true} 
                     maxLength={512}
                 /> 
+            </Form.Item> */}
+
+            <Form.Item 
+                label = 'Content'
+                name = 'content'
+            >
+               <SunEditor /> 
             </Form.Item>
             <Form.Item label = 'Expires on'>
                 <div style = {{

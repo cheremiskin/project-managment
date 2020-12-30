@@ -32,7 +32,11 @@ const TaskCard = (props) => {
                 <Paragraph ellipsis={{ 
                     rows: 1,
                     onExpand: {onMore}
-                }}>{task.content}</Paragraph>
+                }}>
+                    <div dangerouslySetInnerHTML={{__html: task.content}} />
+                </Paragraph>
+
+
                 <span className = 'expiration-time'>Expires at {moment(task.expirationDate).format('YYYY-MM-DD HH:mm')}</span>
             </div>
         </Card>

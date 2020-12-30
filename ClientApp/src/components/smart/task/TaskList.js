@@ -120,7 +120,7 @@ export const TaskList = (props) => {
             .then(() => {
                 HttpProvider.auth(router.task.list({projectId : props.params.projectId}), token)
                     .then(tasks => {
-                        
+                        console.log(tasks);
                         setTasks(tasks)
                         setTaskList(tasks)
                         filterByStatus(0)
@@ -190,7 +190,7 @@ export const TaskList = (props) => {
         }
 
         HttpProvider.get(router.task.statuses()).then(setStatuses)
-    }, [tokenChecked]);
+    }, [tokenChecked, tasks]);
     
     const canDeleteTasks = authenticated && user && (user.isAdmin || user.id === project.creatorId)
 
@@ -243,10 +243,10 @@ export const TaskList = (props) => {
             </div>
             <div className = 'task-container'>
                 {taskList &&
-                    taskList.map(item =>
+                    taskList.map((item, index) =>
                         <TaskCard
                             task = {item}
-                            key={item.id}
+                            key={index}
                             status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
                             deletable = {canDeleteTasks || user && item.creatorId === user.id}
                             onDelete = {() => deleteTask(item.id)}/>
