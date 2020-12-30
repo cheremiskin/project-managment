@@ -86,7 +86,7 @@ const RegistrationForm = (props) => {
       <Form.Item
         name="passwordConfirm"
         label="Confirm Password"
-        dependencies={['Password']}
+        dependencies={['password']}
         hasFeedback
         rules={[
           {
@@ -95,7 +95,7 @@ const RegistrationForm = (props) => {
           },
           ({ getFieldValue }) => ({
             validator(rule, value) {
-              if (!value || getFieldValue('Password') === value) {
+              if (!value || getFieldValue('password') === value) {
                 return Promise.resolve();
               }
               return Promise.reject('The two passwords that you entered do not match!');
