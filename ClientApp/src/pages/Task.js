@@ -129,7 +129,6 @@ export const Task = (props) => {
                     setTaskLoading(false)
                     
                     HttpProvider.auth(router.task.users(props.match.params.id), token).then((users) => { // loading assingees
-                        debugger
                         setUsers(users)
                         setUsersLoading(false)
                     })
@@ -159,7 +158,6 @@ export const Task = (props) => {
         } else {
             HttpProvider.get(router.task.one(props.match.params.id))
                 .then(payload => {
-                    debugger
                     HttpProvider.get(router.project.one(payload.projectId)).then(proj => {
                         HttpProvider.get(router.user.one(proj.creatorId)).then(setCreator)
                         setProject(proj)
@@ -173,7 +171,6 @@ export const Task = (props) => {
                     setTaskLoading(false)
                     
                     HttpProvider.get(router.task.users(props.match.params.id)).then((payload) => {
-                        debugger
                         setUsers(payload)
                         setUsersLoading(false)
                     })
@@ -235,8 +232,6 @@ export const Task = (props) => {
                 openNotification('Failed to change status', '')
             })
     }
-    
-    debugger
     
     if (!tokenChecked)
         return <Spin />
@@ -302,7 +297,8 @@ export const Task = (props) => {
                         }
                     </div>
                     <div> Expires on the {moment(task.expirationDate).format('YYYY-MM-DD HH:mm')}</div>
-                    <h5>{task.content}</h5> 
+                    {/* <h5>{task.content}</h5>  */}
+                    <div dangerouslySetInnerHTML={{__html: task.content}} />
                 </>
             }
             {usersLoading ? <Spin /> :

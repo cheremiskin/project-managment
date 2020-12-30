@@ -23,6 +23,7 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
             okText = 'Create'
             cancelText = 'Cancel'
             visible = {visible}
+            width={800}
             onCancel = {onCancel}
             onOk = {() => {
                 form.validateFields()
