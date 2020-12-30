@@ -3,6 +3,8 @@ import {Form, Input, TimePicker, DatePicker, Select} from "antd";
 import moment from 'moment'
 import SunEditor from 'suneditor-react';
 
+import 'suneditor/dist/css/suneditor.min.css'
+
 const {TextArea} = Input
 const {Option} = Select
 
