@@ -71,11 +71,12 @@ export const TaskList = (props) => {
     const [statuses, setStatuses] = useState(null)
     
     const [chosenStatus, setChosenStatus] = useState(0)
+    const [chosenSortDate, setChosenSortDate] = useState(0)
     const [chosenUser, setChosenUser] = useState(0)
     
     const resetFilters = () => {
         setChosenStatus(0) 
-        setChosenUser(0)
+        setChosenSortDate(0)
     }
     
     const loadTasks = (projectId, token, callback) => {
@@ -87,12 +88,31 @@ export const TaskList = (props) => {
 
     const filterByStatus = (statusId) => {
         setChosenStatus(statusId)
+        setChosenSortDate(0)
         if (statusId === 0){
             setTaskList(tasks)
             return
         }
 
         setTaskList(tasks.filter(t => t.statusId === statusId))
+    }
+    
+    const sortByDate = (dateId) => {
+        setChosenSortDate(dateId)
+        setChosenStatus(0)
+        
+        if (dateId === 0){
+            setTaskList(tasks)
+            return
+        }
+        
+        if (dateId === 1){
+            setTaskList(tasks.sort((a, b) => moment(a.creationDate).isAfter(b.creationDate) ? -1 : 1))
+        }
+        if (dateId === 2){
+            setTaskList(tasks.sort((a, b) => moment(a.expirationDate).isAfter(b.expirationDate) ? -1 : 1))
+        }
+            
     }
     
     const deleteTask = (taskId)  => {
@@ -200,6 +220,18 @@ export const TaskList = (props) => {
                     <Select
                         defaultValue = {0}
                         onChange={(payload) => {
+                            sortByDate(payload)
+                        }}
+                        value = {chosenSortDate}
+                    >
+                        <Option key = {0} value = {0}>Sort by date</Option>
+                        <Option key = {1} value = {1}>By Creation Date</Option>
+                        <Option key = {2} value = {2}>By Expiration Date</Option>
+                    </Select>
+                    
+                    <Select
+                        defaultValue = {0}
+                        onChange={(payload) => {
                             filterByStatus(payload)
                         }}
                         value = {chosenStatus}
@@ -211,21 +243,30 @@ export const TaskList = (props) => {
             </div>
             <div className = 'task-container'>
                 {taskList &&
-                <List
-                    grid={{ gutter: 16, column: 3 }}
-                    itemLayout="horizontal"
-                    dataSource={
-                        taskList
-                    }
-                    renderItem={item =>
+                    taskList.map(item =>
                         <TaskCard
                             task = {item}
                             key={item.id}
                             status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
                             deletable = {canDeleteTasks || user && item.creatorId === user.id}
                             onDelete = {() => deleteTask(item.id)}/>
-                    }
-                />}
+                    )
+                // <List
+                //     grid={{ gutter: 16, column: 3 }}
+                //     itemLayout="horizontal"
+                //     dataSource={
+                //         taskList
+                //     }
+                //     renderItem={item =>
+                //         <TaskCard
+                //             task = {item}
+                //             key={item.id}
+                //             status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
+                //             deletable = {canDeleteTasks || user && item.creatorId === user.id}
+                //             onDelete = {() => deleteTask(item.id)}/>
+                //     }
+                // />
+                }
             </div> 
         </>
     )
