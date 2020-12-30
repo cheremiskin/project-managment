@@ -43,7 +43,7 @@ const RegistrationForm = (props) => {
     >
       <Form.Item
         label="Email"
-        name="Email"
+        name="email"
         rules={[{ required: true, message: 'Please input your email!' }]}
       >
         <Input />
@@ -51,22 +51,24 @@ const RegistrationForm = (props) => {
 
       <Form.Item
         label="Full name"
-        name="FullName"
-        rules={[{ required: true, message: 'Please input your full name!' }]}
+        name="fullName"
+        rules={[{ required: true, message: 'Please input your full name!' },
+          {type: 'regexp', pattern: new RegExp("^[A-Z][a-zA-Z]{1,}(?: [A-Z][a-zA-Z]*){0,2}$"),
+          message: 'Input should be your full name'}]}
       >
         <Input />
       </Form.Item>
 
       <Form.Item
         label="Info"
-        name="Info"
+        name="info"
       >
         <Input.TextArea />
       </Form.Item>
 
       <Form.Item
         label="BirthDate"
-        name="BirthDate"
+        name="birthDate"
       >
         <DatePicker />  
       </Form.Item>
@@ -74,7 +76,7 @@ const RegistrationForm = (props) => {
 
       <Form.Item
         label="Password"
-        name="Password"
+        name="password"
         rules={[{ required: true, message: 'Please input your password!' }]}
         hasFeedback
       >
@@ -82,7 +84,7 @@ const RegistrationForm = (props) => {
       </Form.Item>
 
       <Form.Item
-        name="PasswordConfirm"
+        name="passwordConfirm"
         label="Confirm Password"
         dependencies={['Password']}
         hasFeedback

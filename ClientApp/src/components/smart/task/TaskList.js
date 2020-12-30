@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Form, Modal, Button, Select} from 'antd'
+import {List, Form, Modal, Button, Select} from 'antd'
 import HttpProvider from '../../../HttpProvider';
 import { router } from '../../../router';
 import TaskCard from '../../dumb/task/TaskCard';
@@ -10,6 +10,7 @@ import {connect} from "react-redux";
 import {UserList} from "../../../pages/UserList";
 
 import '../../../assets/styles/components/TaskList.css'
+import openNotification from "../../../openNotification";
 
 const {Option} = Select
 
@@ -59,7 +60,7 @@ const CreateTaskModal = ({visible, onCancel, onCreate, assignableUsers}) => {
 
 export const TaskList = (props) => {
     
-    const {token, canAdd, authenticated, user, project} = props
+    const {token, canAdd, authenticated, user, project, tokenChecked} = props
     
     const [tasks, setTasks] = useState([]);
     const [taskList, setTaskList] = useState(null)
@@ -83,17 +84,38 @@ export const TaskList = (props) => {
             callback(res)
         })
     }
+
+    const filterByStatus = (statusId) => {
+        setChosenStatus(statusId)
+        if (statusId === 0){
+            setTaskList(tasks)
+            return
+        }
+
+        setTaskList(tasks.filter(t => t.statusId === statusId))
+    }
     
     const deleteTask = (taskId)  => {
         HttpProvider.auth_delete(router.task.one(taskId), token)
-            .then(() => loadTasks(props.params.projectId, token, (tasks) => {
-                setTasks(tasks)
-                filterByStatus(chosenStatus)
-            }))
+            .then(() => {
+                HttpProvider.auth(router.task.list({projectId : props.params.projectId}), token)
+                    .then(tasks => {
+                        
+                        setTasks(tasks)
+                        setTaskList(tasks)
+                        filterByStatus(0)
+                    }).catch(error => {
+                        console.log(error)
+                        openNotification('Failed to fetch data')
+                    }) 
+                })
+            .catch(error => {
+                console.log(error)
+                openNotification('Deletion failed')
+            })
     }
     
     const createTask = (values) => {
-        console.log(values)
         HttpProvider.auth_post(router.task.create({projectId : props.params.projectId}), values, token)
             .then((res) => {
                 if (res.id)
@@ -105,6 +127,9 @@ export const TaskList = (props) => {
                                 return prev.concat([task])
                             })
                         })
+            }).catch(error => {
+                console.log(error)
+                openNotification('Creation failed')
             })
     }
     
@@ -112,30 +137,40 @@ export const TaskList = (props) => {
     //     setChosenUser(userId) 
     // }
     
-    const filterByStatus = (statusId) => {
-        setChosenStatus(statusId)
-        if (statusId === 0){
-            setTaskList(tasks)
-            return
-        }
-        
-        setTaskList(tasks.filter(t => t.statusId === statusId))
-    }
     
     useEffect(()=>{
-        loadTasks(props.params.projectId, token, (tasks) => {
-            setTasks(tasks)
-            setTaskList(tasks.sort((t1, t2) => moment(t1.expirationDate).isAfter(moment(t2))))
-        })
         
+        if (!tokenChecked)
+            return
+        
+        if (authenticated){
+            HttpProvider.auth(router.task.list({projectId : props.params.projectId}), token)
+                .then((tasks) => {
+                    HttpProvider.auth(router.project.users(props.params.projectId), token).then(users => {
+                        setUsersInProject(users)
+                    })
+                    setTasks(tasks)
+                    setTaskList(tasks)
+                }).catch((error) => {
+                    console.log(error)
+                    openNotification('Unable to load tasks')
+                })
+        } else {
+            HttpProvider.get(router.task.list({projectId : props.params.projectId}))
+                .then((tasks) => {
+                    HttpProvider.get(router.project.users(props.params.projectId)).then(users => {
+                        setUsersInProject(users)
+                    })
+                    setTasks(tasks)
+                    setTaskList(tasks)
+                }).catch((error) => {
+                console.log(error)
+                openNotification('Unable to load tasks')
+            })
+        }
+
         HttpProvider.get(router.task.statuses()).then(setStatuses)
-    }, []);
-    
-    useEffect(() => {
-        HttpProvider.auth(router.project.users(props.params.projectId), token).then(users => {
-            setUsersInProject(users)
-        })
-    }, [])
+    }, [tokenChecked]);
     
     const canDeleteTasks = authenticated && user && (user.isAdmin || user.id === project.creatorId)
 
@@ -175,15 +210,22 @@ export const TaskList = (props) => {
                 </div>
             </div>
             <div className = 'task-container'>
-                { taskList &&
-                    taskList.map((item, index) => 
-                    <TaskCard
-                        task = {item}
-                        key={index}
-                        status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
-                        deletable = {canDeleteTasks}
-                        onDelete = {() => deleteTask(item.id)}/>
-                )}
+                {taskList &&
+                <List
+                    grid={{ gutter: 16, column: 3 }}
+                    itemLayout="horizontal"
+                    dataSource={
+                        taskList
+                    }
+                    renderItem={item =>
+                        <TaskCard
+                            task = {item}
+                            key={item.id}
+                            status = {statuses ? statuses.find(s => s.id === item.statusId).name : ''}
+                            deletable = {canDeleteTasks || user && item.creatorId === user.id}
+                            onDelete = {() => deleteTask(item.id)}/>
+                    }
+                />}
             </div> 
         </>
     )
@@ -193,7 +235,8 @@ const mapStateToProps = (state) => {
     return {
         token: state.user.token,
         authenticated: state.user.token !== null && state.user.tokenChecked,
-        user: state.user.user
+        user: state.user.user,
+        tokenChecked: state.user.tokenChecked
     }
 }
 
